@@ -64,12 +64,29 @@ let test (elements : NSoup.Select.Elements) =
         | (hd : NSoup.Nodes.Element) :: tl -> match (hd.OwnText()).Trim() with
             |_ when fail > 3 -> loop tl 0 0 []
             |_ when counter > 1000 -> loop [] 0 0 acc
-            |_ when ((hd.OwnText()).Trim()).Length < 25 -> loop tl counter (fail + 1) acc
-            |_ -> loop tl (counter + (hd.OwnText()).Length) fail (hd :: acc)
+            |_ when (hd.OwnText()).Length < 15 -> loop tl counter (fail + 1) acc
+            |_ when (hd.OwnText()).Length > 15 -> loop tl (counter + (hd.OwnText()).Length) fail (hd :: acc)
+            |_ -> loop tl counter fail acc
 
     loop list_ver 0 0 []
         
     
+let get_num listofelements =
+    let parents = List.map (fun (x : NSoup.Nodes.Element) -> x.Parent) listofelements
+    let sort_dict = Map.empty 
+    let rec loop parent_list (map : Microsoft.FSharp.Collections.Map<int, int>) =
+        match parent_list with
+        |[] -> map
+        | hd :: tl -> match (map.ContainsKey(hd.GetHashCode())) with
+            |true -> loop tl (map.Add(hd.GetHashCode(), (map.[hd.GetHashCode()]) + 1))
+            |false -> loop tl (map.Add(hd.GetHashCode(), 0))
+
+    loop parents sort_dict
+
+let asdf (tag1 : NSoup.Nodes.Element) (tag2: NSoup.Nodes.Element) =
+    match (higher tag1 tag2) with
+    |true -> tag1
+    |false -> tag2
 
 let main() = 
     let url = "http://www.baka-tsuki.org/project/index.php?title=Madan_no_Ou_to_Vanadis:Volume01_Prologue"
