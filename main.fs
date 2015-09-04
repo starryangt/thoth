@@ -62,7 +62,7 @@ let test (elements : NSoup.Select.Elements) =
         match ele with
         | [] -> acc
         | (hd : NSoup.Nodes.Element) :: tl -> match (hd.OwnText()).Trim() with
-            |_ when fail > 3 -> loop tl 0 0 []
+            |_ when fail > 3 -> loop tl 0 0 acc
             |_ when counter > 1000 -> loop [] 0 0 acc
             |_ when (hd.OwnText()).Length < 15 -> loop tl counter (fail + 1) acc
             |_ when (hd.OwnText()).Length > 15 -> loop tl (counter + (hd.OwnText()).Length) fail (hd :: acc)
@@ -81,15 +81,19 @@ let get_num listofelements =
             |true -> loop tl (map.Add(hd.GetHashCode(), (map.[hd.GetHashCode()]) + 1))
             |false -> loop tl (map.Add(hd.GetHashCode(), 0))
 
-    loop parents sort_dict
-
+    let result = (loop parents sort_dict) |> Map.toList |> List.sortBy (fun x -> match x with
+        |(_, y) -> y * -1)
+    let head = match result.Head with
+        |(x, _) -> x
+    
+    parents |> List.filter (fun (x : NSoup.Nodes.Element) -> (x.GetHashCode()) = head)
 let asdf (tag1 : NSoup.Nodes.Element) (tag2: NSoup.Nodes.Element) =
     match (higher tag1 tag2) with
     |true -> tag1
     |false -> tag2
 
 let main() = 
-    let url = "http://www.baka-tsuki.org/project/index.php?title=Madan_no_Ou_to_Vanadis:Volume01_Prologue"
+    let url = "http://www.baka-tsuki.org/project/index.php?title=Itsuka_Tenma_no_Kuro_Usagi:Volume_1_Prologue"
     let doc = try_connect(url)
     let (all : NSoup.Select.Elements) = doc.Select("*")
     let head = doc.Head
@@ -99,8 +103,9 @@ let main() =
     let parents = child.Parents
     let contain = higher next child
     let something = all |> test
-    //for element in all do printfn "own_text%s" (element.OwnText())
+    let result = something |> get_num
     printfn "%A" something
+    //for element in all do printfn "own_text%s" (element.OwnText())
         //
         //for elemtn in headline do printfn "text: %s" (elemtn.OwnText())
  
