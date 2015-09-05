@@ -74,7 +74,12 @@ let test (elements : NSoup.Select.Elements) =
     loop list_ver 0 0 []
 
         
-    
+let count_list li =
+    let rec loop count li = match li with
+    |[] -> count
+    | hd :: tl -> loop (count + 1) tl
+    loop 0 li
+
 let rec get_num listofelements =
     let orig_elem = listofelements
     let parents = List.map (fun (x : NSoup.Nodes.Element) -> x.Parent) listofelements
@@ -92,9 +97,10 @@ let rec get_num listofelements =
         |(x, _) -> x
     
     let test_parent = parents |> List.filter (fun (x : NSoup.Nodes.Element) -> (x.GetHashCode()) = head) |> List.head
-    let num_correct = List.fold (fun acc (x : NSoup.Nodes.Element) -> if (lower x test_parent) then acc + 1 else acc) 0 orig_elem
+    let num_correct = List.fold (fun acc (x : NSoup.Nodes.Element) -> if (lower x test_parent) then acc + 1 else acc) 0 listofelements
+    let test_count = (listofelements |> List.length) / 10
     match num_correct with
-    |_ when num_correct > 3 -> test_parent
+    |_ when num_correct > test_count -> test_parent
     |_ -> get_num (listofelements |> List.map(fun (x : NSoup.Nodes.Element) -> x.Parent))
 
 let asdf (tag1 : NSoup.Nodes.Element) (tag2: NSoup.Nodes.Element) =
@@ -114,6 +120,7 @@ let main() =
     let contain = higher next child
     let something = all |> test
     let result = something |> get_num
+    let count = (something |> List.length)
     printfn "hello world%s" (result.Text())
     //for element in all do printfn "own_text%s" (element.OwnText())
         //
