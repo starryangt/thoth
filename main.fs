@@ -20,6 +20,9 @@ let rec try_connect url =
 let higher (tag1 : NSoup.Nodes.Element) (tag2: NSoup.Nodes.Element) =
     (tag2.Parents) |> Seq.exists (fun x -> x = tag1)
 
+let lower (tag1 : NSoup.Nodes.Element) (tag2: NSoup.Nodes.Element) =
+    (tag2.Children) |> Seq.exists (fun x -> x = tag1)
+
 let test_empty (tag : NSoup.Nodes.Element)=
     match (tag.OwnText()).Trim() with
     | "" -> false
@@ -69,9 +72,11 @@ let test (elements : NSoup.Select.Elements) =
             |_ -> loop tl counter fail acc
 
     loop list_ver 0 0 []
+
         
     
-let get_num listofelements =
+let rec get_num listofelements =
+    let orig_elem = listofelements
     let parents = List.map (fun (x : NSoup.Nodes.Element) -> x.Parent) listofelements
     let sort_dict = Map.empty 
     let rec loop parent_list (map : Microsoft.FSharp.Collections.Map<int, int>) =
@@ -86,7 +91,12 @@ let get_num listofelements =
     let head = match result.Head with
         |(x, _) -> x
     
-    parents |> List.filter (fun (x : NSoup.Nodes.Element) -> (x.GetHashCode()) = head)
+    let test_parent = parents |> List.filter (fun (x : NSoup.Nodes.Element) -> (x.GetHashCode()) = head) |> List.head
+    let num_correct = List.fold (fun acc (x : NSoup.Nodes.Element) -> if (lower x test_parent) then acc + 1 else acc) 0 orig_elem
+    match num_correct with
+    |_ when num_correct > 3 -> test_parent
+    |_ -> get_num (listofelements |> List.map(fun (x : NSoup.Nodes.Element) -> x.Parent))
+
 let asdf (tag1 : NSoup.Nodes.Element) (tag2: NSoup.Nodes.Element) =
     match (higher tag1 tag2) with
     |true -> tag1
@@ -104,7 +114,7 @@ let main() =
     let contain = higher next child
     let something = all |> test
     let result = something |> get_num
-    printfn "%A" something
+    printfn "hello world%s" (result.Text())
     //for element in all do printfn "own_text%s" (element.OwnText())
         //
         //for elemtn in headline do printfn "text: %s" (elemtn.OwnText())
