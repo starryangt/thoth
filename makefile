@@ -1,2 +1,7 @@
+OBJS = Download.fs Parse.fs main.fs
+CC = fsharpc
+LINKER = -r NSoup.dll
+OBJ_NAME = main.exe
+
 all:
-	fsharpc -r NSoup.dll main.fs
+	$(CC) $(LINKER) $(OBJS) -o $(OBJ_NAME)

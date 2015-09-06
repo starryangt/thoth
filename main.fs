@@ -1,7 +1,8 @@
 open NSoup
 open System
 open System.Threading
-
+open Download
+open Parse
 
 exception DownloadFailedTooManyTimes of string
 let rec try_connect url =
@@ -110,18 +111,11 @@ let asdf (tag1 : NSoup.Nodes.Element) (tag2: NSoup.Nodes.Element) =
 
 let main() = 
     let url = "http://www.baka-tsuki.org/project/index.php?title=Itsuka_Tenma_no_Kuro_Usagi:Volume_1_Prologue"
-    let doc = try_connect(url)
-    let (all : NSoup.Select.Elements) = doc.Select("*")
-    let head = doc.Head
-    printfn "head %s" (head.TagName())
-    let next = head.NextElementSibling
-    let child = next.Child(1)
-    let parents = child.Parents
-    let contain = higher next child
-    let something = all |> test
-    let result = something |> get_num
-    let count = (something |> List.length)
-    printfn "hello world%s" (result.Text())
+    let doc = NSoupDownload url 
+    let (w : NSoup.Nodes.Document) = match doc with
+    |Some x -> x
+    let head = w.Head
+    printfn "huh%s" (head.Text())
     //for element in all do printfn "own_text%s" (element.OwnText())
         //
         //for elemtn in headline do printfn "text: %s" (elemtn.OwnText())
