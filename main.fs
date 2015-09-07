@@ -114,8 +114,9 @@ let main() =
     let doc = NSoupDownload url 
     let (w : NSoup.Nodes.Document) = match doc with
     |Some x -> x
-    let head = w.Head
-    printfn "huh%s" (head.Text())
+    let content = FindContent w
+    let idk = content |> ParentByMostPopular
+    printfn "huh%A" idk
     //for element in all do printfn "own_text%s" (element.OwnText())
         //
         //for elemtn in headline do printfn "text: %s" (elemtn.OwnText())
