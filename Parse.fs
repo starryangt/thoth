@@ -28,8 +28,23 @@ module Parse
         (Document.Body.Select("*")) |> Seq.toList |> loop [] 0 0
 
     let rec ParentByStringContent content =
-        (*WHAT IN TEH NAME OF FUCK AM I DOING IT"S LATE"*)
-        false
+        (*
+            Given a list of potential content tags returns the parent tag which
+            contains over 70% of the total text contained in the content tags
+        *)
+
+        //This function makes me sad because its better than the other one even though it's
+        //so much simpler :(
+
+        let total = content |> List.fold (fun acc (x : NSoup.Nodes.Element) -> acc + (x.Text()).Length) 0
+        let parents = content |> List.map (fun (x : NSoup.Nodes.Element) -> x.Parent)
+        let rec loop = function
+            |[] -> ParentByStringContent parents
+            | (hd : NSoup.Nodes.Element) :: tl -> match hd with
+            |_ when (float (hd.Text()).Length) / (float total) > 0.7 -> hd
+            |_ -> loop tl
+        loop parents
+        
     let rec ParentByMostPopular content = 
         (*
             Given a list of potential content tags returns the parent tag which
