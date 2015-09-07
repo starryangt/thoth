@@ -6,7 +6,7 @@ open Parse
 open System.IO
 
 let main() = 
-    let url = "http://www.baka-tsuki.org/project/index.php?title=Unlimited_Fafnir:Volume_8_Chapter_1"
+    let url = "http://royalroadl.com/forum/showthread.php?tid=28760"
     //let doc = NSoupClient.Parse(File.ReadAllText("onetag.html"))
     let doc = NSoupDownload url
     let content = FindContent (doc.Value)
