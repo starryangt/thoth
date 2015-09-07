@@ -1,29 +1,42 @@
+(*
+    Does stuff man
+*)
 module Parse
     open NSoup 
     open Download
+    let ignoredTags (x : NSoup.Nodes.Element) = match (x.TagName()) with
+    |"a" -> false
+    |"li" -> false
+    |"script" -> false
+    |_ -> true
 
     let lower (x : NSoup.Nodes.Element) (y : NSoup.Nodes.Element) =
         (*
             Tests if the x is lower than y in the html tree by
             seeing if x is in y's children
         *)
-        (y.Children) |> Seq.exists (fun z -> z = x)
 
+        (y.Children) |> Seq.exists (fun z -> z = x)
+    
     let FindContent (Document : NSoup.Nodes.Document) =
         (*
             Given a NSoup document, pulls a list of all elements in the document
             and processes it, finding a selection of tags which likely contain the
             beginning of content in the document
         *)
+
         let rec loop acc counter fail elements =
             match elements with
             | [] -> acc
-            | (hd : NSoup.Nodes.Element) :: tl -> match (hd.OwnText()).Trim() with
-                                                    |_ when fail > 3 -> loop acc 0 0 tl
-                                                    |_ when counter > 1000 -> loop acc 0 0 []
-                                                    |_ when (hd.OwnText()).Length < 15 -> loop acc counter (fail + 1) tl
-                                                    |_ when (hd.OwnText()).Length > 15 -> loop (hd :: acc) (counter + (hd.OwnText()).Length) fail tl
-                                                    |_ -> loop acc counter fail tl
+            | (hd : NSoup.Nodes.Element) :: tl -> 
+                    match (hd.OwnText()).Trim() with
+                    |_ when fail > 3 -> loop acc 0 0 tl
+                    |_ when counter > 400 -> loop acc 0 0 []
+                    |_ when (hd.OwnText()).Length < 30 -> 
+                            loop acc counter (fail + 1) tl
+                    |_ when (hd.OwnText()).Length > 30 && ignoredTags hd -> 
+                            loop (hd :: acc) (counter + (hd.OwnText()).Length) fail tl
+                    |_ -> loop acc counter fail tl
 
         (Document.Body.Select("*")) |> Seq.toList |> loop [] 0 0
 
