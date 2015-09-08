@@ -40,6 +40,19 @@ module Parse
 
         (Document.Body.Select("*")) |> Seq.toList |> loop [] 0 0
 
+    let GetParents (element : NSoup.Nodes.Element) =
+        (*
+            Gets Some parent or None if null
+            Because runtime errors in your functional program whyyy
+        *)
+
+        let parent = element.Parent
+        if not (parent <> null) then
+            None
+        else
+            Some parent
+
+
     let rec ParentByStringContent content =
         (*
             Given a list of potential content tags returns the parent tag which
@@ -50,11 +63,20 @@ module Parse
         //so much simpler :(
 
         let total = content |> List.fold (fun acc (x : NSoup.Nodes.Element) -> acc + (x.Text()).Length) 0
-        let parents = content |> List.map (fun (x : NSoup.Nodes.Element) -> x.Parent)
+        let rec ProcessParents acc content = match content with
+        |[] -> acc
+        | (hd : NSoup.Nodes.Element) :: tl -> 
+                match (GetParents hd) with
+                |Some(x) -> ProcessParents (x :: acc) tl
+                |None -> ProcessParents acc tl
+
+        let parents = content |> ProcessParents []
+
         let rec loop = function
+            |_ when (parents |> List.length) = 0 -> None
             |[] -> ParentByStringContent parents
             | (hd : NSoup.Nodes.Element) :: tl -> match hd with
-            |_ when (float (hd.Text()).Length) / (float total) > 0.7 -> hd
+            |_ when (float (hd.Text()).Length) / (float total) > 0.7 -> Some hd
             |_ -> loop tl
         loop parents
         
