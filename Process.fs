@@ -7,6 +7,13 @@ module Process
     open Download
 
     type ProcessedImages = class
+        (*
+            Class that represents the result from processing the images
+            Consist of a list of the original sources to be used for downloading
+            and a list of filepaths to what should be downloaded
+        *)
+
+        //TODO Validate that original sources and filepaths are of the same length
         val originalSources : list<string>
         val filepaths: list<string>
         
@@ -16,6 +23,11 @@ module Process
 
 
     type Page = class
+        (*
+            Class that represents an entire page
+            The constructor is useless, constuction is actually handled by
+            ProcessPage
+        *)
         val url : string
         val title : string
         val html : string
@@ -28,6 +40,9 @@ module Process
      
     
     let GetImage (parent : NSoup.Nodes.Element) =
+        (*
+            Helper function that wraps around Children.Select("img")
+        *)
         try
             Some (parent.Children.Select("img"))
         with
@@ -66,6 +81,14 @@ module Process
                  
 
     let ProcessPage url =
+        (*
+            Uses a Maybe monad (defined in Monads.fs) to download the file, get the title,
+            get the content, get the parent tag, process the images, and return a new
+            Page object.
+            If downloading the file, getting the content, or getting the parent tag fails, then
+            the entire operation fails
+            GetTitle cannot fail and images will default to an empty image source
+        *)
         let maybe = new OptionBuilder() 
         
         maybe{
@@ -81,4 +104,4 @@ module Process
 
             return (new Page(url, title, (parent.Html()), images))
         }
-
+    

@@ -7,6 +7,10 @@ module Parse
     open Monads
 
     let ignoredTags (x : NSoup.Nodes.Element) = match (x.TagName()) with
+    (*
+        Returns false for any tag that is "ignored"
+        Used for FindContent
+    *)
     |"a" -> false
     |"li" -> false
     |"script" -> false
@@ -21,6 +25,10 @@ module Parse
         (y.Children) |> Seq.exists (fun z -> z = x)
     
     let GetTitle (document : NSoup.Nodes.Document) =
+        (*
+            Helper function that wraps around document.Select("title")
+            Cannot fail; defaults to "No Title Found"
+        *)
         let title = (document.Select("title")) |> Seq.head
         if not (title <> null) then 
           "No Title Found"
@@ -96,6 +104,9 @@ module Parse
             
             The complexity of this function is O(ihavenoideabutitsnotgood)
         *)
+        //NOTE: Function deprecated
+        //You cannot use it, it doesn't return Option parent
+        //It seems inferior in every way to ParentByStringContent, so I'm not maintaining it anymore
         let parents = content |> List.map (fun (x : NSoup.Nodes.Element) -> x.Parent)
         
         let rec loop (map : Microsoft.FSharp.Collections.Map<int, int>) parents =
