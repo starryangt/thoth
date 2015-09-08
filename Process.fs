@@ -3,6 +3,8 @@ module Process
     open System.IO
     open System
     open Monads
+    open Parse
+    open Download
 
     type ProcessedImages = class
         val originalSources : list<string>
@@ -23,11 +25,13 @@ module Process
             {url = URL; title = TITLE; html = HTML; images = IMAGES}
     end
     
-   
-    let ProcessPage url =
-        let Option = new OptionBuilder()
-
-        5 
+     
+    
+    let GetImage (parent : NSoup.Nodes.Element) =
+        try
+            Some (parent.Children.Select("img"))
+        with
+        |_ -> None
 
     let ProcessImages title images =
         (*
@@ -59,7 +63,22 @@ module Process
 
         let filepaths = loop 0 [] (images |> Seq.toList)
         new ProcessedImages(originalSources, filepaths)
-
                  
 
+    let ProcessPage url =
+        let maybe = new OptionBuilder() 
+        
+        maybe{
+            let! doc = NSoupDownload url
+            let title = GetTitle doc
+            let! content = FindContent doc
+            let! parent = content |> ParentByStringContent
+            let imageSources = GetImage parent
+            let images = 
+                match imageSources with
+                |Some x -> ProcessImages title x
+                |None -> new ProcessedImages([], [])
+
+            return (new Page(url, title, (parent.Html()), images))
+        }
 

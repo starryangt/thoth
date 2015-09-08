@@ -4,6 +4,8 @@
 module Parse
     open NSoup 
     open Download
+    open Monads
+
     let ignoredTags (x : NSoup.Nodes.Element) = match (x.TagName()) with
     |"a" -> false
     |"li" -> false
@@ -18,6 +20,13 @@ module Parse
 
         (y.Children) |> Seq.exists (fun z -> z = x)
     
+    let GetTitle (document : NSoup.Nodes.Document) =
+        let title = (document.Select("title")) |> Seq.head
+        if not (title <> null) then 
+          "No Title Found"
+        else
+          (title.Text())
+
     let FindContent (Document : NSoup.Nodes.Document) =
         (*
             Given a NSoup document, pulls a list of all elements in the document
@@ -27,7 +36,7 @@ module Parse
 
         let rec loop acc counter fail elements =
             match elements with
-            | [] -> acc
+            | [] -> Some acc
             | (hd : NSoup.Nodes.Element) :: tl -> 
                     match (hd.OwnText()).Trim() with
                     |_ when fail > 3 -> loop acc 0 0 tl
@@ -70,7 +79,7 @@ module Parse
                 |Some(x) -> ProcessParents (x :: acc) tl
                 |None -> ProcessParents acc tl
 
-        let parents = content |> ProcessParents []
+        let parents = content |> MaybeMap (fun x -> GetParents x)
 
         let rec loop = function
             |_ when (parents |> List.length) = 0 -> None
@@ -110,3 +119,5 @@ module Parse
         match passRate with
             |_ when passRate > (content |> List.length) / 8 -> parentPotential
             |_ -> ParentByMostPopular parents
+
+
