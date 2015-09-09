@@ -2,7 +2,8 @@ module Download
 open System.Net
 open System.IO
 open NSoup
-
+open System.Text
+    
     //TODO: Implement .Net's WebBrowser to get content behind anti-ddos
     let NSoupDownload (url : string) =
 
@@ -15,7 +16,9 @@ open NSoup
                 None
             else
                 try
-                    Some (client.DownloadString(url))
+                    let raw = client.DownloadData(url)
+                    let encoding = Encoding.UTF8
+                    Some (encoding.GetString(raw))
                 with
                 |_ -> DownloadURL url (counter + 1)
         
@@ -53,4 +56,4 @@ open NSoup
 
     let WriteXHTML title content filepath =
         let template = TemplateXHTML title content
-        File.WriteAllText(filepath, template)
+        File.WriteAllText(filepath, template, Encoding.BigEndianUnicode)

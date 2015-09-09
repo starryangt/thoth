@@ -3,6 +3,8 @@ module Monads
     (*
     Collection of useful monads
     No, I have no idea how they work
+
+    In the end, this file turned into a collection of useful functions
     *)
 
     type OptionBuilder() =
@@ -30,3 +32,10 @@ module Monads
                 |Some x -> loop (x :: acc) tl
                 |None -> loop acc tl
         loop [] list
+
+    let pmap f l =
+        (*
+            Async map
+        *)
+        seq { for a in l -> async { return f a } }
+        |> Async.Parallel |> Async.RunSynchronously

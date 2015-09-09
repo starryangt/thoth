@@ -5,6 +5,7 @@ module Process
     open Monads
     open Parse
     open Download
+    open System.Text
 
     type ProcessedImages = class
         (*
@@ -31,13 +32,11 @@ module Process
         val url : string
         val title : string
         val html : string
-        val UUID : string
+        val uuid : string
         val images : ProcessedImages
 
-        new (URL, TITLE, HTML, IMAGES) as this =
-            {url = URL; title = TITLE; html = HTML; UUID = ""; images = IMAGES;}
-            then
-                this.UUID = Guid.NewGuid().ToString("N").Substring(0, 7)
+        new (URL, TITLE, HTML, UUID, IMAGES) =
+            {url = URL; title = TITLE; html = HTML; uuid = UUID; images = IMAGES;}
 
         member x.GetHTML =
             x.html
@@ -104,19 +103,20 @@ module Process
             let! content = FindContent doc
             let! parent = content |> ParentByStringContent
             let imageSources = GetImage parent
+            let id = Guid.NewGuid().ToString("N")
             let images = 
                 match imageSources with
                 |Some x -> ProcessImages title x
                 |None -> new ProcessedImages([], [])
 
-            return (new Page(url, title, (parent.Html()), images))
+            return (new Page(url, title, (parent.Html()), id, images))
         }
 
     let DownloadPage (page : Page) =
         
         //Write html
         printfn "Downloading... %s" page.title
-        WriteXHTML page.title page.html ("temp/" + page.UUID + ".xhtml")
+        WriteXHTML page.title page.html ("temp/" + page.uuid + ".xhtml")
         //Download images, stuff
         let (images : ProcessedImages) = page.images
         printfn "Downloading images for %s" page.title
@@ -128,7 +128,8 @@ module Process
 
 
     let ProcessList urls =
-        urls |> MaybeMap (fun x -> ProcessPage x)
+        let pages = urls |> MaybeMap (fun x -> ProcessPage x)
+        pmap (fun x -> DownloadPage x) pages      
         //what it does
         //Turns the urls into pages
         //For each page, download the images, write the html,
