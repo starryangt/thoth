@@ -31,10 +31,16 @@ module Process
         val url : string
         val title : string
         val html : string
+        val UUID : string
         val images : ProcessedImages
-        
-        new (URL, TITLE, HTML, IMAGES) =
-            {url = URL; title = TITLE; html = HTML; images = IMAGES}
+
+        new (URL, TITLE, HTML, IMAGES) as this =
+            {url = URL; title = TITLE; html = HTML; UUID = ""; images = IMAGES;}
+            then
+                this.UUID = Guid.NewGuid().ToString("N").Substring(0, 7)
+
+        member x.GetHTML =
+            x.html
     end
     
      
@@ -61,7 +67,8 @@ module Process
         //return list of filepaths
         let originalSources = images |> Seq.toList |> List.map (fun (x : NSoup.Nodes.Element) -> x.Attr("src"))
         let UUID = Guid.NewGuid().ToString("N").Substring(0, 7)
-        let identifier = title + UUID 
+        //title?
+        let identifier = UUID 
         let rec loop counter (acc : list<string>) (im : list<NSoup.Nodes.Element>) = 
             if (im = []) then
                 acc
@@ -104,4 +111,26 @@ module Process
 
             return (new Page(url, title, (parent.Html()), images))
         }
+
+    let DownloadPage (page : Page) =
+        
+        //Write html
+        printfn "Downloading... %s" page.title
+        WriteXHTML page.title page.html ("temp/" + page.UUID + ".xhtml")
+        //Download images, stuff
+        let (images : ProcessedImages) = page.images
+        printfn "Downloading images for %s" page.title
+        (List.zip images.originalSources images.filepaths) |> List.map (fun x ->
+            printfn "Downloading... %s" (fst x)
+            match x with
+            |(a, b) -> ImageDownload a b)
+        
+
+
+    let ProcessList urls =
+        urls |> MaybeMap (fun x -> ProcessPage x)
+        //what it does
+        //Turns the urls into pages
+        //For each page, download the images, write the html,
+        //AND DO IT ASYNC
     

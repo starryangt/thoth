@@ -2,6 +2,7 @@ module Download
 open System.Net
 open System.IO
 open NSoup
+
     //TODO: Implement .Net's WebBrowser to get content behind anti-ddos
     let NSoupDownload (url : string) =
 
@@ -36,4 +37,20 @@ open NSoup
         |"" -> ".png"
         |_ -> Path.GetExtension(url)
         false 
-        
+    let TemplateXHTML (title : string) (content : string) =
+    sprintf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n\
+<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n\
+<html xmlns=\"http://www.w3.org/1999/xhtml\">\n\
+	<head>\n\
+		<title></title>\n\
+	</head>\n\
+	<body>\n\
+		<h3 align=\"center\">%s</h3>\n\
+		<hr />\n\
+		%s\n\
+	</body>\n\
+        </html>" title content;;
+
+    let WriteXHTML title content filepath =
+        let template = TemplateXHTML title content
+        File.WriteAllText(filepath, template)
