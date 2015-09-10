@@ -1,6 +1,6 @@
-OBJS = Download.fs Parse.fs Process.fs main.fs
+OBJS = Monads.fs Download.fs Parse.fs Epub.fs Process.fs main.fs
 CC = fsharpc
-LINKER = -r NSoup.dll
+LINKER = -r NSoup.dll -r System.IO.Compression.FileSystem
 OBJ_NAME = main.exe
 
 all:

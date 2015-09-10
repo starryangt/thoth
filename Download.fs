@@ -3,7 +3,8 @@ open System.Net
 open System.IO
 open NSoup
 open System.Text
-    
+open System
+
     //TODO: Implement .Net's WebBrowser to get content behind anti-ddos
     let NSoupDownload (url : string) =
 
@@ -26,6 +27,15 @@ open System.Text
         |Some x -> Some (NSoupClient.Parse(x, url))
         |None -> None
 
+    let RelativeToAbsolute (absolute : string) (relative : string) =
+        (*
+            Wrapper around the Uri object's ability to construct an absolute 
+            uri from an absolute uri and a relative one
+
+            Uses strings and returns strings
+        *)
+        (new Uri(new Uri(absolute), new Uri(relative))).AbsoluteUri
+    
     let ImageDownload (url : string) (filepath : string) =
         let client = new WebClient()
 
@@ -42,8 +52,8 @@ open System.Text
         false 
     let TemplateXHTML (title : string) (content : string) =
     sprintf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n\
-<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n\
-<html xmlns=\"http://www.w3.org/1999/xhtml\">\n\
+    <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n\
+    <html xmlns=\"http://www.w3.org/1999/xhtml\">\n\
 	<head>\n\
 		<title></title>\n\
 	</head>\n\

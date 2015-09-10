@@ -53,7 +53,7 @@ module Process
         with
         |_ -> None
 
-    let ProcessImages title images =
+    let ProcessImages url title images =
         (*
             This function is terrible and not pure at all but
             I don't want to make deep copies of everything. So blame
@@ -64,7 +64,9 @@ module Process
         //Grab the original src, put in list
         //Change the src to what new url would be
         //return list of filepaths
-        let originalSources = images |> Seq.toList |> List.map (fun (x : NSoup.Nodes.Element) -> x.Attr("src"))
+        let originalSources = images |> Seq.toList 
+                            |> List.map (fun (x : NSoup.Nodes.Element) -> x.Attr("src"))
+                            |> List.map (fun (x : string) -> RelativeToAbsolute url x)
         let UUID = Guid.NewGuid().ToString("N").Substring(0, 7)
         //title?
         let identifier = UUID 
@@ -106,7 +108,7 @@ module Process
             let id = Guid.NewGuid().ToString("N")
             let images = 
                 match imageSources with
-                |Some x -> ProcessImages title x
+                |Some x -> ProcessImages url title x
                 |None -> new ProcessedImages([], [])
 
             return (new Page(url, title, (parent.Html()), id, images))
@@ -124,8 +126,6 @@ module Process
             printfn "Downloading... %s" (fst x)
             match x with
             |(a, b) -> ImageDownload a b)
-        
-
 
     let ProcessList urls =
         let pages = urls |> MaybeMap (fun x -> ProcessPage x)

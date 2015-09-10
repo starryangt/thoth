@@ -8,14 +8,22 @@ open System.IO
 open Monads
 open System.Net
 open System.Text
-open System.IO.Compression
+open System.Web
+open Epub
 
 [<EntryPoint>]
 let main args = 
     let url = "http://skythewood.blogspot.sg/p/altina-sword-princess.html"
-    let urls = ["http://krytykal.org/antimagic/volume-1/chapter-1/"; "http://krytykal.org/antimagic/volume-1/chapter-2/"; "http://krytykal.org/antimagic/volume-1/chapter-3/"]
+    let urls = ["http://www.baka-tsuki.org/project/index.php?title=Seirei_Tsukai_no_Blade_Dance:Volume1_Chapter1"; "http://www.baka-tsuki.org/project/index.php?title=Seirei_Tsukai_no_Blade_Dance:Volume1_Chapter2"; "http://www.baka-tsuki.org/project/index.php?title=Seirei_Tsukai_no_Blade_Dance:Volume1_Chapter3"]
+
+    let book = GetBook |> AddTitle "hello" |> AddPublisher "pub" |> AddHTML "something.xhtml" "tITLE" |> AddImage "www.jpg" |> GenerateContent
+
+    printfn "%s" book
+    //ProcessList urls
+    //printfn "%A" (HttpUtility.HtmlDecode(uri))
+    //let what = ProcessList urls
+    //printfn "%A" what
     //let page = (ProcessPage (urls.Head)).Value
-    ZipFile.CreateFromDirectory("wtf/", "test.epub", CompressionLevel.NoCompression, false)
     0
     //for element in all do printfn "own_text%s" (element.OwnText())
         //
