@@ -67,6 +67,7 @@ module Process
         let originalSources = images |> Seq.toList 
                             |> List.map (fun (x : NSoup.Nodes.Element) -> x.Attr("src"))
                             |> List.map (fun (x : string) -> RelativeToAbsolute url x)
+
         let UUID = Guid.NewGuid().ToString("N").Substring(0, 7)
         //title?
         let identifier = UUID 

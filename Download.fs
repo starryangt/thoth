@@ -35,7 +35,7 @@ open System
 
             Uses strings and returns strings
         *)
-        (new Uri(new Uri(absolute), new Uri(relative))).AbsoluteUri
+        (new Uri(new Uri(absolute), new Uri(relative, UriKind.Relative))).AbsoluteUri
     
     let ImageDownload (url : string) (filepath : string) =
         let client = new WebClient()
