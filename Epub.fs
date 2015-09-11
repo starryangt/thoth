@@ -130,10 +130,22 @@ module Epub
         let foot = "\n</spine>\n<guide>\n<reference href=\"Text/Cover.xhtml\" title=\"Cover\" type=\"cover\"/>"
         (head + htmlBody + coverImage + imageBody + bodyEnd + tocPart + foot)
 
+    let WriteMimetype path =
+        let mimetype = "application/epub+zip"
+        File.WriteAllText(path, mimetype)
+
+    let WriteContainer path =
+        let container = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
+                        <container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">\n\
+                        \t<rootfiles>\n\
+                        \t\t<rootfile full-path=\"OEBPS/content.opf\" media-type=\"application/oebps-package+xml\"/>\n\
+                        \t</rootfiles>\n\
+                        </container>"
+        File.WriteAllText(path, container)
 
 
-
-
+    let CreateEpub (book : Book) =
+        ZipFile.CreateFromDirectory("temp", (book.metadata.["title"] + ".epub"), CompressionLevel.NoCompression, false)
 
 
 

@@ -13,6 +13,7 @@ open System
         *)
         let rec DownloadURL (url : string) counter =
             let client = new WebClient()
+            printfn "Attemp %d" counter
             if counter > 2 then
                 None
             else
@@ -66,4 +67,4 @@ open System
 
     let WriteXHTML title content filepath =
         let template = TemplateXHTML title content
-        File.WriteAllText(filepath, template, Encoding.BigEndianUnicode)
+        File.WriteAllText(filepath, template)

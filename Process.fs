@@ -82,7 +82,7 @@ module Process
                 let filename = identifier + (string counter) + extension
             
                 head.Attr("src", "../Images/" + filename)
-                loop (counter + 1) (("temp/" + filename) :: acc) (List.tail im)
+                loop (counter + 1) (("temp/OEBPS/Images/" + filename) :: acc) (List.tail im)
 
         let filepaths = loop 0 [] (images |> Seq.toList)
         new ProcessedImages(originalSources, filepaths)
@@ -116,9 +116,16 @@ module Process
 
     let DownloadPage (page : Page) =
         
+        //Create neccesary file structure
+        Directory.CreateDirectory "temp"
+        Directory.CreateDirectory "temp/OEBPS"
+        Directory.CreateDirectory "temp/OEBPS/Text"
+        Directory.CreateDirectory "temp/OEBPS/Images"
+        Directory.CreateDirectory "temp/META-INF"
+
         //Write html
         printfn "Downloading... %s" page.title
-        WriteXHTML page.title page.html ("temp/" + page.uuid + ".xhtml")
+        WriteXHTML page.title page.html ("temp/OEBPS/Text/" + page.uuid + ".xhtml")
         //Download images, stuff
         let (images : ProcessedImages) = page.images
         printfn "Downloading images for %s" page.title

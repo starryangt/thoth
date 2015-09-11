@@ -9,6 +9,7 @@ open Monads
 open System.Net
 open System.Text
 open System.Web
+open System.IO.Compression
 open Epub
 
 [<EntryPoint>]
@@ -16,9 +17,9 @@ let main args =
     let url = "http://skythewood.blogspot.sg/p/altina-sword-princess.html"
     let urls = ["http://www.baka-tsuki.org/project/index.php?title=Seirei_Tsukai_no_Blade_Dance:Volume1_Chapter1"; "http://www.baka-tsuki.org/project/index.php?title=Seirei_Tsukai_no_Blade_Dance:Volume1_Chapter2"; "http://www.baka-tsuki.org/project/index.php?title=Seirei_Tsukai_no_Blade_Dance:Volume1_Chapter3"]
 
-    let book = GetBook |> AddTitle "hello" |> AddPublisher "pub" |> AddHTML "something.xhtml" "tITLE" |> AddImage "www.jpg" |> GenerateContent
-
-    printfn "%s" book
+    let book = GetBook |> AddTitle "title"
+    ZipFile.CreateFromDirectory("temp", "a.epub", CompressionLevel.NoCompression, false)
+    printfn "no"
     //ProcessList urls
     //printfn "%A" (HttpUtility.HtmlDecode(uri))
     //let what = ProcessList urls
