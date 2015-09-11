@@ -6,15 +6,16 @@ module Parse
     open Download
     open Monads
 
-    let ignoredTags (x : NSoup.Nodes.Element) = match (x.TagName()) with
+    let ignoredTags (x : NSoup.Nodes.Element) = 
+        match (x.TagName()) with
     (*
         Returns false for any tag that is "ignored"
         Used for FindContent
     *)
-    |"a" -> false
-    |"li" -> false
-    |"script" -> false
-    |_ -> true
+        |"a" -> false
+        |"li" -> false
+        |"script" -> false
+        |_ -> true
 
     let lower (x : NSoup.Nodes.Element) (y : NSoup.Nodes.Element) =
         (*
@@ -35,7 +36,7 @@ module Parse
         else
           (title.Text())
 
-    let FindContent (Document : NSoup.Nodes.Document) =
+    let FindContent (document : NSoup.Nodes.Document) =
         (*
             Given a NSoup document, pulls a list of all elements in the document
             and processes it, finding a selection of tags which likely contain the
@@ -55,7 +56,7 @@ module Parse
                             loop (hd :: acc) (counter + (hd.OwnText()).Length) fail tl
                     |_ -> loop acc counter fail tl
 
-        (Document.Body.Select("*")) |> Seq.toList |> loop [] 0 0
+        (document.Body.Select("*")) |> Seq.toList |> loop [] 0 0
 
     let GetParents (element : NSoup.Nodes.Element) =
         (*
@@ -80,21 +81,23 @@ module Parse
         //so much simpler :(
 
         let total = content |> List.fold (fun acc (x : NSoup.Nodes.Element) -> acc + (x.Text()).Length) 0
-        let rec ProcessParents acc content = match content with
-        |[] -> acc
-        | (hd : NSoup.Nodes.Element) :: tl -> 
-                match (GetParents hd) with
-                |Some(x) -> ProcessParents (x :: acc) tl
-                |None -> ProcessParents acc tl
+        let rec ProcessParents acc content = 
+            match content with
+            |[] -> acc
+            | (hd : NSoup.Nodes.Element) :: tl -> 
+                    match (GetParents hd) with
+                    |Some(x) -> ProcessParents (x :: acc) tl
+                    |None -> ProcessParents acc tl
 
         let parents = content |> MaybeMap (fun x -> GetParents x)
 
         let rec loop = function
             |_ when (parents |> List.length) = 0 -> None
             |[] -> ParentByStringContent parents
-            | (hd : NSoup.Nodes.Element) :: tl -> match hd with
-            |_ when (float (hd.Text()).Length) / (float total) > 0.7 -> Some hd
-            |_ -> loop tl
+            | (hd : NSoup.Nodes.Element) :: tl -> 
+                    match hd with
+                    |_ when (float (hd.Text()).Length) / (float total) > 0.7 -> Some hd
+                    |_ -> loop tl
         loop parents
         
     let rec ParentByMostPopular content = 

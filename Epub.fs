@@ -81,18 +81,19 @@ module Epub
 
     let GenerateTOC (book : Book) =
         let head = (sprintf "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\
-        <!DOCTYPE ncx PUBLIC \"-//NISO//DTD ncx 2005-1//EN\" \"http://www.daisy.org/z3986/2005/ncx-2005-1.dtd\">\n\
-        <ncx xmlns=\"http://www.daisy.org/z3986/2005/ncx/\" version=\"2005-1\">\n\
-        <head>\n\
-        <meta name=\"dtb:uid\" content=\"urn:uuid:%s\"/>\n\
-        <meta name=\"dtb:depth\" content=\"1\"/>\n\
-        <meta name=\"dtb:totalPageCount\" content=\"0\"/>\n\
-        <meta name=\"dtb:maxPageNumber\" content=\"0\"/>\n\
-        </head>\n\
-        <docTitle>\n\
-        <text>%s</text>\n\
-        </docTitle>\n\
-        <navMap>" (Guid.NewGuid().ToString("N")) (book.metadata.["title"]))
+            <!DOCTYPE ncx PUBLIC \"-//NISO//DTD ncx 2005-1//EN\" \"http://www.daisy.org/z3986/2005/ncx-2005-1.dtd\">\n\
+            <ncx xmlns=\"http://www.daisy.org/z3986/2005/ncx/\" version=\"2005-1\">\n\
+            <head>\n\
+            <meta name=\"dtb:uid\" content=\"urn:uuid:%s\"/>\n\
+            <meta name=\"dtb:depth\" content=\"1\"/>\n\
+            <meta name=\"dtb:totalPageCount\" content=\"0\"/>\n\
+            <meta name=\"dtb:maxPageNumber\" content=\"0\"/>\n\
+            </head>\n\
+            <docTitle>\n\
+            <text>%s</text>\n\
+            </docTitle>\n\
+            <navMap>" 
+            (Guid.NewGuid().ToString("N")) (book.metadata.["title"]))
         let formatBody (toc : TocItem) =
             sprintf "\n    <navPoint id=\"navPoint-%i\" playOrder=\"%i\">\n\
                     <navLabel>\n\
@@ -119,15 +120,22 @@ module Epub
             <item href=\"toc.ncx\" id=\"ncx\" media-type=\"application/x-dtbncx+xml\"/>\n\
             <item href=\"Text/Cover.xhtml\" id=\"Cover.xhtml\" media-type=\"application/xhtml+xml\"/>"  
             (Guid.NewGuid().ToString("N")) (book.metadata.["title"]) (book.metadata.["author"]) (book.metadata.["author"]))
+
         let htmlBody = book.chapters |> List.map (fun (x : Chapter) ->
             sprintf "<item href=\"%s\" id=\"%s\" media-type=\"application/xhtml+xml\"/>" x.src x.id) |> List.reduce (+)
+
         let coverImage = "<item href=\"Images/Cover.jpg\" id=\"Cover.jpg\" media-type=\"image/jpeg\"/>"
+
         let imageBody = book.images |> List.map (fun (x : ImageData) ->
             sprintf "<item href=\"%s\" id=\"%s\" media-type=\"image/jpeg\"/>" x.src x.id) |> List.reduce (+)
+
         let bodyEnd = "\n</manifest>\n<spine toc=\"ncx\">\n<item idref=\"Cover.xhtml\"/>"
+
         let tocPart = book.toc |> List.map (fun (x : TocItem) ->
             sprintf "<itemref idref=\"%s\"/>" x.id) |> List.reduce (+)
+
         let foot = "\n</spine>\n<guide>\n<reference href=\"Text/Cover.xhtml\" title=\"Cover\" type=\"cover\"/>"
+
         (head + htmlBody + coverImage + imageBody + bodyEnd + tocPart + foot)
 
     let WriteMimetype path =

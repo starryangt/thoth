@@ -35,11 +35,8 @@ module Process
         val uuid : string
         val images : ProcessedImages
 
-        new (URL, TITLE, HTML, UUID, IMAGES) =
-            {url = URL; title = TITLE; html = HTML; uuid = UUID; images = IMAGES;}
-
-        member x.GetHTML =
-            x.html
+        new (url, title, html, uuid, images) =
+            {url = url; title = title; html = html; uuid = uuid; images = images;}
     end
     
      
@@ -76,13 +73,14 @@ module Process
                 acc
             else
                 let head = im |> List.head
-                let extension = match (Path.GetExtension(head.Attr("src"))) with
-                |"" -> ".png"
-                |_ -> (Path.GetExtension(head.Attr("src"))) 
+                let extension = 
+                    match (Path.GetExtension(head.Attr("src"))) with
+                    |"" -> ".png"
+                    |_ -> (Path.GetExtension(head.Attr("src"))) 
 
                 let filename = identifier + (string counter) + extension
             
-                head.Attr("src", "../Images/" + filename)
+                head.Attr("src", "../Images/" + filename) |> ignore
                 loop (counter + 1) (("temp/OEBPS/Images/" + filename) :: acc) (List.tail im)
 
         let filepaths = loop 0 [] (images |> Seq.toList)
@@ -118,11 +116,11 @@ module Process
     let DownloadPage (page : Page) =
         
         //Create neccesary file structure
-        Directory.CreateDirectory "temp"
-        Directory.CreateDirectory "temp/OEBPS"
-        Directory.CreateDirectory "temp/OEBPS/Text"
-        Directory.CreateDirectory "temp/OEBPS/Images"
-        Directory.CreateDirectory "temp/META-INF"
+        Directory.CreateDirectory "temp" |> ignore
+        Directory.CreateDirectory "temp/OEBPS" |> ignore
+        Directory.CreateDirectory "temp/OEBPS/Text" |> ignore
+        Directory.CreateDirectory "temp/OEBPS/Images" |> ignore
+        Directory.CreateDirectory "temp/META-INF" |> ignore
 
         //Write html
         printfn "Downloading... %s" page.title
