@@ -1,8 +1,6 @@
 test/
 *.swp
 *.swo
-*.png
-*.jpg
 *.epub
-*.exe
+makefile
 temp/
