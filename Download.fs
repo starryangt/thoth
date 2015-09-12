@@ -63,3 +63,8 @@ module Download
     let WriteXHTML title content filepath =
         let template = TemplateXHTML title content
         File.WriteAllText(filepath, template)
+
+    let CheckAndDelete filepath =
+        match File.Exists(filepath) with
+        |false -> ()
+        |true -> File.Delete(filepath)

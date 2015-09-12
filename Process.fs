@@ -6,6 +6,7 @@ module Process
     open Parse
     open Download
     open System.Text
+    open Epub
 
     type ProcessedImages = class
         (*
@@ -135,7 +136,21 @@ module Process
 
     let ProcessList urls =
         let pages = urls |> MaybeMap (fun x -> ProcessPage x)
-        pmap (fun x -> DownloadPage x) pages      
+        pmap (fun x -> DownloadPage x) pages |> ignore
+        pages 
+    
+    let EbookFromList title author urls =
+        let pages = ProcessList urls
+        let book = GetBook |> AddTitle title |> AddAuthor author 
+        let html = pages |> List.rev |> List.fold (fun (acc : Book) (page : Page) ->
+            acc |> AddHTML ("temp/OEBPS/Text/" + page.uuid + ".xhtml") page.title) book
+        let img = pages |> List.fold (fun (acc : Book) (page : Page) ->
+            page.images.filepaths |> List.fold (fun ac img ->
+                ac |> AddImage img) acc) html
+        img
+            
+
+        
         //what it does
         //Turns the urls into pages
         //For each page, download the images, write the html,

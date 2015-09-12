@@ -2,6 +2,7 @@ module Epub
     open System.IO
     open System
     open System.IO.Compression
+    open Download
 
     type Chapter =
         val id : string
@@ -153,6 +154,17 @@ module Epub
 
 
     let CreateEpub (book : Book) =
+        //Write TOC and Content.opf files
+        File.WriteAllText("temp/OEBPS/content.opf", book |> GenerateTOC)
+        File.WriteAllText("temp/OEBPS/toc.ncx", book |> GenerateContent)
+        
+        //Write mimetype and container
+        WriteMimetype "temp"
+        WriteMimetype "temp/META-INF"
+
+        //Check and delete potential file, because .net throws an exception
+        //rather than overwriting
+        CheckAndDelete (book.metadata.["title"] + ".epub")
         ZipFile.CreateFromDirectory("temp", (book.metadata.["title"] + ".epub"), CompressionLevel.NoCompression, false)
 
 
