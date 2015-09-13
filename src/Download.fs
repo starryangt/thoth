@@ -4,6 +4,7 @@ module Download
     open NSoup
     open System.Text
     open System
+    open System.Windows.Forms
 
     //TODO: Implement .Net's WebBrowser to get content behind anti-ddos
     let NSoupDownload (url : string) =
@@ -27,6 +28,9 @@ module Download
         match (DownloadURL url 0) with
         |Some x -> Some (NSoupClient.Parse(x, url))
         |None -> None
+
+    let CreateRelativePath path =
+        IO.Path.Combine(IO.Directory.GetParent(Application.ExecutablePath).FullName, path)
 
     let RelativeToAbsolute (absolute : string) (relative : string) =
         (*

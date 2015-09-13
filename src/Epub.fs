@@ -95,6 +95,7 @@ module Epub
             </docTitle>\n\
             <navMap>" 
             (Guid.NewGuid().ToString("N")) (book.metadata.["title"]))
+
         let formatBody (toc : TocItem) =
             sprintf "\n    <navPoint id=\"navPoint-%i\" playOrder=\"%i\">\n\
                     <navLabel>\n\
@@ -154,21 +155,29 @@ module Epub
 
 
     let CreateEpub (book : Book) =
-        File.Copy("Cover/Cover.xhtml", "temp/OEBPS/Text/Cover.xhtml", true)
-        if (book.metadata.["cover"]) = "" || (ImageDownload book.metadata.["cover"] "temp/OEBPS/Images/Cover.png").IsNone then
-            File.Copy("Cover/Cover.png", "temp/OEBPS/Images/Cover.png")
+        File.Copy((CreateRelativePath "Cover/Cover.xhtml"), 
+            (CreateRelativePath "temp/OEBPS/Text/Cover.xhtml"), true)
+        if (book.metadata.["cover"]) = "" || 
+            (ImageDownload book.metadata.["cover"] 
+                (CreateRelativePath "temp/OEBPS/Images/Cover.png")).IsNone then 
+            File.Copy((CreateRelativePath "Cover/Cover.png"), 
+                (CreateRelativePath "temp/OEBPS/Images/Cover.png"))
+
         //Write TOC and Content.opf files
-        File.WriteAllText("temp/OEBPS/content.opf", book |> GenerateContent)
-        File.WriteAllText("temp/OEBPS/toc.ncx", book |> GenerateTOC)
+        File.WriteAllText((CreateRelativePath "temp/OEBPS/content.opf"), book |> GenerateContent)
+        File.WriteAllText((CreateRelativePath "temp/OEBPS/toc.ncx"), book |> GenerateTOC)
         
         //Write mimetype and container
-        WriteMimetype "temp/mimetype"
-        WriteContainer "temp/META-INF/container.xml"
+        WriteMimetype (CreateRelativePath "temp/mimetype")
+        WriteContainer (CreateRelativePath "temp/META-INF/container.xml")
 
         //Check and delete potential file, because .net throws an exception
         //rather than overwriting
         CheckAndDelete (book.metadata.["title"] + ".epub")
-        ZipFile.CreateFromDirectory("temp", (book.metadata.["title"] + ".epub"), CompressionLevel.NoCompression, false)
+        ZipFile.CreateFromDirectory((CreateRelativePath "temp"), 
+            (book.metadata.["title"] + ".epub"),
+            CompressionLevel.NoCompression, false)
+        Directory.Delete(CreateRelativePath "temp", true)
 
 
 
