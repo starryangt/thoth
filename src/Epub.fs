@@ -128,8 +128,11 @@ module Epub
 
         let coverImage = "<item href=\"Images/Cover.png\" id=\"Cover.png\" media-type=\"image/png\"/>\n"
 
-        let imageBody = book.images |> List.map (fun (x : ImageData) ->
-            sprintf "<item href=\"%s\" id=\"%s\" media-type=\"image/jpeg\"/>\n" x.src x.id) |> List.reduce (+)
+        let imageBody = 
+            match book.images with
+            |[] -> ""
+            |_ -> book.images |> List.map (fun (x : ImageData) ->
+                    sprintf "<item href=\"%s\" id=\"%s\" media-type=\"image/jpeg\"/>\n" x.src x.id) |> List.reduce (+)
 
         let bodyEnd = "</manifest>\n<spine toc=\"ncx\">\n<item idref=\"Cover.xhtml\"/>\n"
 
