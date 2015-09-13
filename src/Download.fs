@@ -44,16 +44,6 @@ module Download
 
         IO.Path.Combine(IO.Directory.GetParent(Application.ExecutablePath).FullName, path)
 
-    let RelativeToAbsolute (absolute : string) (relative : string) =
-        (*
-            Wrapper around the Uri object's ability to construct an absolute 
-            uri from an absolute uri and a relative one
-
-            Uses strings and returns strings
-        *)
-
-        (new Uri(new Uri(absolute), new Uri(relative, UriKind.Relative))).AbsoluteUri
-    
     let ImageDownload (url : string) (filepath : string) =
         (*
             Wrapper around WebClientDownload 
