@@ -25,15 +25,23 @@ let ListBehavior (args : CLOptions) =
     EbookFromList title author cover args.inputs 
 
 let ProcessInput (input : string) =
+    
+    //Regex? What's that? /s
     let comma = input.IndexOf(",")
     let first = input.Substring(0, comma) |> System.Int32.Parse
     let rest = input.Substring(comma + 1) |> System.Int32.Parse
     (first, rest) 
 
 let rec IndexWebBehavior url (args : CLOptions) =
+    let rec AskInsistently question =
+        let result = GetURLs (Ask question)
+        match result with
+        |Some(x) -> x
+        |None -> printfn "Invalid Index, try again."; AskInsistently question
+
     let index = 
         match url with
-        |"" -> (GetURLs (Ask "Enter Index: ")).Value
+        |"" -> AskInsistently "Enter Index URL: "
         |_ -> (GetURLs url).Value
         
     let urls = index |> Seq.map (fun (x : NSoup.Nodes.Element) -> (x.Attr("abs:href")))

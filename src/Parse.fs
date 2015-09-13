@@ -30,11 +30,10 @@ module Parse
             Helper function that wraps around document.Select("title")
             Cannot fail; defaults to "No Title Found"
         *)
-        let title = (document.Select("title")) |> Seq.head
-        if not (title <> null) then 
-          "No Title Found"
-        else
-          (title.Text())
+        let title = (document.Select("title"))
+        match (title |> Seq.isEmpty) with
+        |true -> "No Title Found"
+        |false -> (title |> Seq.head).Text()
 
     let FindContent (document : NSoup.Nodes.Document) =
         (*

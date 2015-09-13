@@ -1,4 +1,4 @@
-### fsharp-ws
+### thoth
 Making epubs from web pages.
 
 ####Depedencies
@@ -6,7 +6,7 @@ The only dependency is NSoup, which is a port of JSoup to .net. Of course, the .
 
 ####Usage
 
-fsharp-ws is intended to be used as a command line program, but works as just an executable as well, though some flexibility is lost. There are three main ways to feed in urls:
+thoth is intended to be used as a command line program, but works as just an executable as well, though some flexibility is lost. There are three main ways to feed in urls:
 
 1. An index file on the internet
 
@@ -22,12 +22,21 @@ fsharp-ws is intended to be used as a command line program, but works as just an
   
 #####Flags
 
-* -a — Sets the author
-* -t — Sets the title
-* -c — Sets the cover
+* -a Author — Sets the author
+* -t Title— Sets the title
+* -c CoverUrl.jpg — Sets the cover
 * -w — Downloads the argument as index
 
 ####FAQ
+
+* Why is it called thoth?
+
+    Something something patron god of scribes something. Also carried me through the midgame of Persona 4. 
+
+* I want to change the default cover picture
+
+    Swap Cover/Cover.png with whatever you want. It has to end with .png, because I'm lazy.
+
 * I want to compile this.
 
   Okay. It should compile fine in either mono or microsoft's f# compiler. The (basic) makefile I used is even there.
@@ -44,7 +53,7 @@ fsharp-ws is intended to be used as a command line program, but works as just an
   
   Because I wanted to learn a ML-derived language
 
-* Does this work on Linux?
+* Does this work on Linux/OSX?
 
   Actually, it does. I developed it mostly in mono on linux. You do need v4.0 of the mono runtime because ZipFile wasn't implemented till then.
   

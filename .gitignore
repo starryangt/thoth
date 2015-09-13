@@ -2,5 +2,6 @@ test/
 *.swp
 *.swo
 *.epub
+*.exe
 makefile
 temp/

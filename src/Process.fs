@@ -148,7 +148,8 @@ module Process
         *)
 
         let pages = ProcessList urls
-        let book = GetBook |> AddTitle title |> AddAuthor author |>AddCover cover
+        if (pages |> List.length) < 1 then failwith "All pages failed to download."
+        let book = GetBook |> AddTitle title |> AddAuthor author |> AddCover cover
         let html = pages |> List.rev |> List.fold (fun (acc : Book) (page : Page) ->
             acc |> AddHTML ((CreateRelativePath "temp/OEBPS/Text/") + page.uuid + ".xhtml") page.title) book
         let img = pages |> List.fold (fun (acc : Book) (page : Page) ->
