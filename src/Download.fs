@@ -4,6 +4,7 @@ module Download
     open NSoup
     open System.Text
     open System
+    open System.Web
     open System.Windows.Forms
 
     //TODO: Implement .Net's WebBrowser to get content behind anti-ddos
