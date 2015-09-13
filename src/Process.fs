@@ -58,16 +58,11 @@ module Process
             .net object references.
         *)
         
-        //steps
-        //Grab the original src, put in list
-        //Change the src to what new url would be
-        //return list of filepaths
         let originalSources = images |> Seq.toList 
                             |> List.map (fun (x : NSoup.Nodes.Element) -> x.Attr("src"))
                             |> List.map (fun (x : string) -> RelativeToAbsolute url x)
 
         let UUID = Guid.NewGuid().ToString("N").Substring(0, 7)
-        //title?
         let identifier = UUID 
         let rec loop counter (acc : list<string>) (im : list<NSoup.Nodes.Element>) = 
             if (im = []) then
@@ -84,6 +79,9 @@ module Process
         new ProcessedImages(originalSources, filepaths)
      
     let GetURLs url =
+        (*
+            Returns a sequence of all anchor tags
+        *)
         let doc = NSoupDownload url
         match doc with
         |Some(x) -> Some (x.Body.Select("a"))
@@ -116,7 +114,13 @@ module Process
         }
 
     let DownloadPage (page : Page) =
+        (*
+            Takes a page, writes the html and downloads the images. 
+        *)
+
         //Create neccesary file structure
+        //Directory.CreateDirectory checks to see if the path exists first
+        //so no overhead
         Directory.CreateDirectory (CreateRelativePath "temp") |> ignore
         Directory.CreateDirectory (CreateRelativePath "temp/OEBPS") |> ignore
         Directory.CreateDirectory (CreateRelativePath "temp/OEBPS/Text") |> ignore
@@ -124,35 +128,33 @@ module Process
         Directory.CreateDirectory (CreateRelativePath "temp/META-INF") |> ignore
 
         //Write html
-        printfn "Downloading... %s" page.title
         WriteXHTML page.title page.html ((CreateRelativePath "temp/OEBPS/Text/") + page.uuid + ".xhtml")
         //Download images, stuff
         let (images : ProcessedImages) = page.images
         printfn "Downloading images for %s" page.title
         (List.zip images.originalSources images.filepaths) |> List.map (fun x ->
-            printfn "Downloading... %s" (fst x)
             match x with
             |(a, b) -> ImageDownload a b)
 
     let ProcessList urls =
         let pages = urls |> MaybeMap (fun x -> ProcessPage x)
+        //This is not actually pmap
         pmap (fun x -> DownloadPage x) pages |> ignore
         pages 
     
-    let EbookFromList title author urls =
+    let EbookFromList title author cover urls =
+        (*
+            "Complete" function - takes an title, author, cover and a list of urls.
+            Downloads all the urls and creates an epub.
+        *)
+
         let pages = ProcessList urls
-        let book = GetBook |> AddTitle title |> AddAuthor author 
+        let book = GetBook |> AddTitle title |> AddAuthor author |>AddCover cover
         let html = pages |> List.rev |> List.fold (fun (acc : Book) (page : Page) ->
             acc |> AddHTML ((CreateRelativePath "temp/OEBPS/Text/") + page.uuid + ".xhtml") page.title) book
         let img = pages |> List.fold (fun (acc : Book) (page : Page) ->
             page.images.filepaths |> List.fold (fun ac img ->
                 ac |> AddImage img) acc) html
         CreateEpub img
-            
-
-        
-        //what it does
-        //Turns the urls into pages
-        //For each page, download the images, write the html,
-        //AND DO IT ASYNC
+             
     

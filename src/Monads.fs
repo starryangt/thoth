@@ -30,7 +30,7 @@ module Monads
 
     let pmap f l =
         (*
-            Async map
+            Parallel map
         *)
         seq { for a in l -> async { return f a } }
         |> Async.Parallel |> Async.RunSynchronously

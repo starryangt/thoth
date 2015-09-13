@@ -77,9 +77,6 @@ module Parse
             contains over 70% of the total text contained in the content tags
         *)
 
-        //This function makes me sad because its better than the other one even though it's
-        //so much simpler :(
-
         let total = content |> List.fold (fun acc (x : NSoup.Nodes.Element) -> acc + (x.Text()).Length) 0
         let rec ProcessParents acc content = 
             match content with
@@ -99,39 +96,4 @@ module Parse
                     |_ when (float (hd.Text()).Length) / (float total) > 0.7 -> Some hd
                     |_ -> loop tl
         loop parents
-        
-    let rec ParentByMostPopular content = 
-        (*
-            Given a list of potential content tags returns the parent tag which
-            is the parent of a 1/8 of the tags
-            
-            The complexity of this function is O(ihavenoideabutitsnotgood)
-        *)
-        //NOTE: Function deprecated
-        //You cannot use it, it doesn't return Option parent
-        //It seems inferior in every way to ParentByStringContent, so I'm not maintaining it anymore
-        let parents = content |> List.map (fun (x : NSoup.Nodes.Element) -> x.Parent)
-        
-        let rec loop (map : Microsoft.FSharp.Collections.Map<int, int>) parents =
-            //this was the intuitive way to get the most common element for me
-            //I'm pretty sure you could use a monad for this but then I'd have to
-            //know how to use monads
-            match parents with
-            |[] -> map
-            | hd :: tl -> match (map.ContainsKey(hd.GetHashCode())) with
-                            |true -> loop (map.Add(hd.GetHashCode(), (map.[hd.GetHashCode()]) + 1)) tl
-                            |false -> loop (map.Add(hd.GetHashCode(), 0)) tl
-        //This log string of functions gets the hash code of the most common parent
-        let hash = parents |> loop Map.empty |> Map.toList 
-                            |> List.sortBy (fun x -> match x with | (_, y) -> y * -1) 
-                            |> List.head |> function |(x, _) -> x
-        
-        let parentPotential = parents |> List.filter (fun (x : NSoup.Nodes.Element) -> 
-            (x.GetHashCode()) = hash) |> List.head
-        let passRate = content |> List.fold (fun acc x -> 
-            if (lower x parentPotential) then acc + 1 else acc) 0
-        match passRate with
-            |_ when passRate > (content |> List.length) / 8 -> parentPotential
-            |_ -> ParentByMostPopular parents
-
 

@@ -9,12 +9,20 @@ module Download
     //TODO: Implement .Net's WebBrowser to get content behind anti-ddos
     let NSoupDownload (url : string) =
 
-        (* Given a url, tries to download it 3 times, then aborts to None
+        (* 
+            Given a url, tries to download it 3 times, then aborts to None
             If succesful, passes the content to NSoup for parsing
+            
+            Downloads the raw data and then encodes it because WebClient does
+            not encode files properly normally.
+
+            It should take the encoding from a http header, but I'm lazy and
+            most sites are UTF-8 regardless. 
         *)
+        
         let rec DownloadURL (url : string) counter =
             let client = new WebClient()
-            printfn "Attemp %d" counter
+            printfn "Downloading... %s" url
             if counter > 2 then
                 None
             else
@@ -30,6 +38,10 @@ module Download
         |None -> None
 
     let CreateRelativePath path =
+        (*
+            Creates a path relative to the executable
+        *)
+
         IO.Path.Combine(IO.Directory.GetParent(Application.ExecutablePath).FullName, path)
 
     let RelativeToAbsolute (absolute : string) (relative : string) =
@@ -39,11 +51,15 @@ module Download
 
             Uses strings and returns strings
         *)
+
         (new Uri(new Uri(absolute), new Uri(relative, UriKind.Relative))).AbsoluteUri
     
     let ImageDownload (url : string) (filepath : string) =
-        let client = new WebClient()
+        (*
+            Wrapper around WebClientDownload 
+        *)
 
+        let client = new WebClient()
         try
             client.DownloadFile(url, filepath)
             Some filepath
@@ -65,15 +81,30 @@ module Download
             </html>" title content;;
 
     let WriteXHTML title content filepath =
+        (*
+            Writes HTML to drive, using the template above.
+            Split into two functions because of sprintf shenanigans.
+        *)
+
         let template = TemplateXHTML title content
         File.WriteAllText(filepath, template)
 
     let CheckAndDelete filepath =
+        (*
+            Wrapper around delete that checks if the file exists 
+        *)
+
         match File.Exists(filepath) with
         |false -> ()
         |true -> File.Delete(filepath)
     
     let GetExtension filepath =
+        (*
+            A wrapper around Path.GetExtension. The reason why it matches against
+            specific types is that Path.GetExtension will place get requests and
+            other nonsense from urls into the path
+        *)
+
         let extension = Path.GetExtension(filepath)
         match extension with
         |".png" -> ".png"

@@ -1,9 +1,7 @@
 module Arguments
-    //Different options
-    //Flags - 
-    //Options If ony one non-flag argument, then index behavior
-    //If more than one, then list behavior
-    //list-file flag
+    (*
+        Processes arguments
+    *)
 
     type AuthorState = 
         |EmptyAuthor
