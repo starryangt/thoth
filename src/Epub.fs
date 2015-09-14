@@ -177,9 +177,26 @@ module Epub
         //Check and delete potential file, because .net throws an exception
         //rather than overwriting
         CheckAndDelete (book.metadata.["title"] + ".epub")
-        ZipFile.CreateFromDirectory((CreateRelativePath "temp"), 
-            (book.metadata.["title"] + ".epub"),
-            CompressionLevel.NoCompression, false)
+
+        //Create new zip
+        let newZip = ZipFile.Open(book.metadata.["title"] + ".epub", ZipArchiveMode.Create)
+        
+        //add in mimetype and container.xml
+        newZip.CreateEntryFromFile((CreateRelativePath "temp/mimetype"), "mimetype") |> ignore
+        newZip.CreateEntryFromFile((CreateRelativePath "temp/META-INF/container.xml"), "META-INF/container.xml") |> ignore
+        
+        //Add in the content and toc files
+        newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/content.opf"), "OEBPS/content.opf") |> ignore
+        newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/toc.ncx"), "OEBPS/toc.ncx") |> ignore
+
+        //add in the new files
+        book.chapters |> List.iter (fun (x : Chapter) ->
+            newZip.CreateEntryFromFile((CreateRelativePath x.directory), "OEBPS/" + x.src) |> ignore)
+        if (book.images |> List.length) > 0 then
+            book.images |> List.iter (fun (x : ImageData) ->
+                newZip.CreateEntryFromFile((CreateRelativePath x.directory), "OEBPS/" + x.src) |> ignore)
+        newZip.Dispose()
+        
         Directory.Delete(CreateRelativePath "temp", true)
 
 

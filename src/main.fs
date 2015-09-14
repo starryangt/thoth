@@ -3,6 +3,7 @@ open Arguments
 open System
 open Download
 open System.IO
+open System.IO.Compression
 open System.Windows.Forms
 
 let Ask question =
@@ -87,10 +88,7 @@ let IndexListBehavior (args : CLOptions) =
 
     EbookFromList title author cover urls 
     
-    
-[<EntryPoint>]
-let main args = 
-    let arguments = ProcessArguments args
+let HandleArguments (arguments : CLOptions) =
     match arguments.inputs with
     |_ when (arguments.inputs |> List.length) < 1 ->
             IndexWebBehavior "" arguments
@@ -100,4 +98,10 @@ let main args =
             |WebIndex -> IndexWebBehavior (arguments.inputs |> List.head) arguments
     |_ ->
             ListBehavior arguments
+
+[<EntryPoint>]
+let main args = 
+    let arguments = ProcessArguments args
+    HandleArguments arguments
+    
     0
