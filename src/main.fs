@@ -101,7 +101,6 @@ let HandleArguments (arguments : CLOptions) =
 
 [<EntryPoint>]
 let main args = 
-    Directory.Delete(CreateRelativePath "temp")
     let arguments = ProcessArguments args
     HandleArguments arguments
     
