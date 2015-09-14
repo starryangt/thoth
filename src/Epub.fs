@@ -188,6 +188,10 @@ module Epub
         //Add in the content and toc files
         newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/content.opf"), "OEBPS/content.opf") |> ignore
         newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/toc.ncx"), "OEBPS/toc.ncx") |> ignore
+        
+        //Add in cover
+        newZip.CreateEntryFromFile((CreateRelativePath "Cover/Cover.xhtml"), "OEBPS/Text/Cover.xhtml") |> ignore
+        newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/Images/Cover.png"), "OEBPS/Images/Cover.png") |> ignore
 
         //add in the new files
         book.chapters |> List.iter (fun (x : Chapter) ->
