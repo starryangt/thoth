@@ -1,6 +1,7 @@
 module Process
     open NSoup
     open System.IO
+    open System.Net
     open System
     open Monads
     open Parse
@@ -41,6 +42,17 @@ module Process
     end
     
      
+    let EverythingGoesToP (parent : NSoup.Nodes.Element) =
+        (*
+            "Sanitizes" the text. Only p's; unfortunately, no formatting, but also no random script tags.
+        *)
+        List.map (fun (x : NSoup.Nodes.Element) -> x.Text()) (parent.Children |> Seq.toList)
+            |> List.map (fun x -> WebUtility.HtmlEncode(x))
+            |> List.map (fun x -> sprintf "<p>%s</p>" x)
+            |> List.fold (fun old next -> old + next + "\n") ""
+
+    let ElementToHtml (parent : NSoup.Nodes.Element) =
+        (parent.Html())
     
     let GetImage (parent : NSoup.Nodes.Element) =
         (*
@@ -86,7 +98,7 @@ module Process
         |Some(x) -> Some (x.Body.Select("a"))
         |None -> None
 
-    let ProcessPage url =
+    let ProcessPage strict url =
         (*
             Uses a Maybe monad (defined in Monads.fs) to download the file, get the title,
             get the content, get the parent tag, process the images, and return a new
@@ -95,6 +107,11 @@ module Process
             the entire operation fails
             GetTitle cannot fail and images will default to an empty image source
         *)
+        let processor =
+            match strict with
+            |true -> EverythingGoesToP
+            |false -> ElementToHtml
+
         let maybe = new OptionBuilder() 
         
         maybe{
@@ -109,7 +126,7 @@ module Process
                 |Some x -> ProcessImages url title x
                 |None -> new ProcessedImages([], [])
 
-            return (new Page(url, title, (parent.Html()), id, images))
+            return (new Page(url, title, (parent |> processor), id, images))
         }
 
     let DownloadPage (page : Page) =
@@ -135,19 +152,19 @@ module Process
             match x with
             |(a, b) -> ImageDownload a b)
 
-    let ProcessList urls =
-        let pages = urls |> MaybeMap (fun x -> ProcessPage x)
+    let ProcessList strict urls =
+        let pages = urls |> MaybeMap (fun x -> ProcessPage strict x)
         //This is not actually pmap
         pmap (fun x -> DownloadPage x) pages |> ignore
         pages 
     
-    let EbookFromList title author cover urls =
+    let EbookFromList (strict : bool) title author cover urls =
         (*
             "Complete" function - takes an title, author, cover and a list of urls.
             Downloads all the urls and creates an epub.
         *)
 
-        let pages = ProcessList urls
+        let pages = ProcessList strict urls
         if (pages |> List.length) < 1 then failwith "All pages failed to download."
         let book = GetBook |> AddTitle title |> AddAuthor author |> AddCover cover
         let html = pages |> List.rev |> List.fold (fun (acc : Book) (page : Page) ->

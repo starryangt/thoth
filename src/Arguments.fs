@@ -26,36 +26,43 @@ module Arguments
         val author : AuthorState
         val cover : CoverState
         val index : IndexState
+        val strict : bool
+
+        new (input, file, title, author, cover, index, strict) =
+            {inputs = input; file = file; title = title; author = author; cover = cover; index = index; strict = strict}
 
         new (input, file, title, author, cover, index) =
-            {inputs = input; file = file; title = title; author = author; cover = cover; index = index}
+            {inputs = input; file = file; title = title; author = author; cover = cover; index = index; strict = false}
 
         new (input, file, title, author, cover) =
-            {inputs = input; file = file; title = title; author = author; cover = cover; index = FileIndex}
+            {inputs = input; file = file; title = title; author = author; cover = cover; index = FileIndex; strict = false}
 
         new (input, file, title, author) =
-            {inputs = input; file = file; title = title; author = author; cover = EmptyCover; index = FileIndex}
+            {inputs = input; file = file; title = title; author = author; cover = EmptyCover; index = FileIndex; strict = false}
     
         new (input, (options : CLOptions)) =
-            {inputs = input; file = options.file; title = options.title; author = options.author; cover = options.cover; index = options.index}
+            {inputs = input; file = options.file; title = options.title; author = options.author; cover = options.cover; index = options.index; strict = options.strict}
 
         member x.SetFile file =
-            new CLOptions(x.inputs, file, x.title, x.author)
+            new CLOptions(x.inputs, file, x.title, x.author, x.cover, x.index, x.strict)
         
         member x.SetAuthor author =
-            new CLOptions(x.inputs, x.file, x.title, author)
+            new CLOptions(x.inputs, x.file, x.title, author, x.cover, x.index, x.strict)
 
         member x.SetTitle title =
-            new CLOptions(x.inputs, x.file, title, x.author)
+            new CLOptions(x.inputs, x.file, title, x.author, x.cover, x.index, x.strict)
 
         member x.SetCover cover =
-            new CLOptions(x.inputs, x.file, x.title, x.author, cover)
-    
+            new CLOptions(x.inputs, x.file, x.title, x.author, cover, x.index, x.strict)
+
+        member x.SetStrict strict =
+            new CLOptions(x.inputs, x.file, x.title, x.author, x.cover, x.index, strict)
+ 
         member x.SetIndex index =
-            new CLOptions(x.inputs, x.file, x.title, x.author, x.cover, index)
+            new CLOptions(x.inputs, x.file, x.title, x.author, x.cover, index, x.strict)
 
         member x.AddInput input =
-            new CLOptions((input :: x.inputs), x.file, x.title, x.author) 
+            new CLOptions((input :: x.inputs), x.file, x.title, x.author, x.cover, x.index, x.strict) 
 
     end
         
@@ -66,6 +73,7 @@ module Arguments
             match arguments with
             |[] -> acc
             |"-f" :: tl -> loop tl (acc.SetFile true)
+            |"-s" :: tl -> loop tl (acc.SetStrict true)
             |"-w" :: tl -> loop tl (acc.SetIndex WebIndex)
             |"-c" :: tl ->
                     match tl with

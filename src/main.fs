@@ -1,8 +1,10 @@
+open Download
+open Parse
 open Process
 open Arguments
 open System
-open Download
 open System.IO
+open System.Net
 open System.IO.Compression
 open System.Windows.Forms
 
@@ -23,7 +25,7 @@ let ListBehavior (args : CLOptions) =
         match args.cover with
         |Cover(x) -> x
         |EmptyCover -> Ask "Enter Cover Image URI (optional): "
-    EbookFromList title author cover args.inputs 
+    EbookFromList args.strict title author cover args.inputs 
 
 let ProcessInput (input : string) =
     
@@ -59,6 +61,7 @@ let rec IndexWebBehavior url (args : CLOptions) =
         match args.cover with
         |Cover(x) -> x
         |EmptyCover -> Ask "Enter Cover Image URI (optional): "
+
     urlsText |> Seq.iteri (fun i x -> printfn "%d - %s" i x) |> ignore
     let input = ProcessInput (Ask "Enter range in format 'a,b'")
     let range =
@@ -67,7 +70,7 @@ let rec IndexWebBehavior url (args : CLOptions) =
     let targets = range |> Seq.map (fun x -> Seq.nth x urls)
     printfn "Downloading... "
     targets |> Seq.iter (fun x -> printfn "%s" x) |> ignore
-    EbookFromList title author cover (targets |> Seq.toList)
+    EbookFromList args.strict title author cover (targets |> Seq.toList)
      
 let IndexListBehavior (args : CLOptions) =
     let filepath = (args.inputs |> List.head)
@@ -86,7 +89,7 @@ let IndexListBehavior (args : CLOptions) =
         |Cover(x) -> x
         |EmptyCover -> Ask "Enter Cover Image URI (optional): "
 
-    EbookFromList title author cover urls 
+    EbookFromList args.strict title author cover urls 
     
 let HandleArguments (arguments : CLOptions) =
     match arguments.inputs with
@@ -103,5 +106,6 @@ let HandleArguments (arguments : CLOptions) =
 let main args = 
     let arguments = ProcessArguments args
     HandleArguments arguments
-    
+    //let p = (ProcessPage "https://shintranslations.com/vol-2-chapter-1-part-1/").Value
+    //printf "%A" p.html
     0

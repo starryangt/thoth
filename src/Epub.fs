@@ -124,7 +124,7 @@ module Epub
             (Guid.NewGuid().ToString("N")) (book.metadata.["title"]) (book.metadata.["author"]) (book.metadata.["author"]))
 
         let htmlBody = book.chapters |> List.rev |> List.map (fun (x : Chapter) ->
-            sprintf "<item href=\"%s\" id=\"%s\" media-type=\"application/xhtml+xml\"/>\n" x.src x.id) |> List.reduce (+)
+            sprintf "<item href=\"%s\" id=\"i%s\" media-type=\"application/xhtml+xml\"/>\n" x.src x.id) |> List.reduce (+)
 
         let coverImage = "<item href=\"Images/Cover.png\" id=\"Cover.png\" media-type=\"image/png\"/>\n"
 
@@ -132,12 +132,12 @@ module Epub
             match book.images with
             |[] -> ""
             |_ -> book.images |> List.map (fun (x : ImageData) ->
-                    sprintf "<item href=\"%s\" id=\"%s\" media-type=\"image/jpeg\"/>\n" x.src x.id) |> List.reduce (+)
+                    sprintf "<item href=\"%s\" id=\"i%s\" media-type=\"image/jpeg\"/>\n" x.src x.id) |> List.reduce (+)
 
-        let bodyEnd = "</manifest>\n<spine toc=\"ncx\">\n<item idref=\"Cover.xhtml\"/>\n"
+        let bodyEnd = "</manifest>\n<spine toc=\"ncx\">\n<itemref idref=\"Cover.xhtml\"/>\n"
 
         let tocPart = book.toc |> List.rev |> List.map (fun (x : TocItem) ->
-            sprintf "<itemref idref=\"%s\"/>\n" x.id) |> List.reduce (+)
+            sprintf "<itemref idref=\"i%s\"/>\n" x.id) |> List.reduce (+)
 
         let foot = "\n</spine>\n<guide>\n<reference href=\"Text/Cover.xhtml\" title=\"Cover\" type=\"cover\"/>\n</guide>\n</package>"
 
