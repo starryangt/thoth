@@ -26,6 +26,7 @@ thoth is intended to be used as a command line program, but works as just an exe
 * -t Title— Sets the title
 * -c CoverUrl.jpg — Sets the cover
 * -w — Downloads the argument as index
+* -s — Sets strict mode on. Use if you're getting XML errors in the generated epubs (i.e if the epub doesn't open, try this)
 
 ####FAQ
 
