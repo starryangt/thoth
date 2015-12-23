@@ -86,7 +86,7 @@ module Process
                 head.Attr("src", "../Images/" + filename) |> ignore
                 loop (counter + 1) (((CreateRelativePath "temp/OEBPS/Images/") + filename) :: acc) (List.tail im)
 
-        let filepaths = loop 0 [] (images |> Seq.toList)
+        let filepaths = (loop 0 [] (images |> Seq.toList)) |> List.rev
         new ProcessedImages(originalSources, filepaths)
      
     let GetURLs url =
