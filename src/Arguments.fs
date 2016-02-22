@@ -18,6 +18,7 @@ module Arguments
     type IndexState =
         |WebIndex
         |FileIndex
+        |NovelIndex
 
     type CLOptions = class
         val inputs : list<string>
@@ -45,7 +46,7 @@ module Arguments
 
         member x.SetFile file =
             new CLOptions(x.inputs, file, x.title, x.author, x.cover, x.index, x.strict)
-        
+         
         member x.SetAuthor author =
             new CLOptions(x.inputs, x.file, x.title, author, x.cover, x.index, x.strict)
 
@@ -73,6 +74,7 @@ module Arguments
             match arguments with
             |[] -> acc
             |"-f" :: tl -> loop tl (acc.SetFile true)
+            |"-n" :: tl -> loop tl (acc.SetIndex NovelIndex)
             |"-s" :: tl -> loop tl (acc.SetStrict true)
             |"-w" :: tl -> loop tl (acc.SetIndex WebIndex)
             |"-c" :: tl ->

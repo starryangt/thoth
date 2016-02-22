@@ -5,6 +5,7 @@ module Parse
     open NSoup 
     open Download
     open Monads
+    open System
 
     let ignoredTags (x : NSoup.Nodes.Element) = 
         match (x.TagName()) with
@@ -95,4 +96,28 @@ module Parse
                     |_ when (float (hd.Text()).Length) / (float total) > 0.7 -> Some hd
                     |_ -> loop tl
         loop parents
+
+    let GetAllLinks (baseLink : string) =
+        let GetLinks (doc : NSoup.Nodes.Document) =
+            let a = doc.Select("a.chp-release")
+            a |> Seq.toList |> List.map (fun (x : NSoup.Nodes.Element) ->
+                x.Attr("abs:href"))
+        let CombineLinks (url1 : string) (url2 : string) =
+            let url = 
+                match (url1.EndsWith("/")) with
+                |true -> url1
+                |false -> (url1 + "/")
+            let baseUrl = new Uri(url)
+            (new Uri(baseUrl, url2))
+        let rec loop (acc : List<string>) (next : string) =
+            let newDoc = NSoupDownload ((CombineLinks baseLink next).ToString())
+            match newDoc with
+            |None -> None
+            |Some(x) -> 
+                    match (x.Select("a.next_page") |> Seq.toList) with
+                    |[] -> Some (List.append acc (GetLinks(x)))
+                    |_ -> loop (List.append acc (GetLinks(x))) (((x.Select("a.next_page") |> Seq.toList).Head).Attr("abs:href"))
+        loop [] ""
+
+
 

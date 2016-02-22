@@ -90,7 +90,36 @@ let IndexListBehavior (args : CLOptions) =
         |EmptyCover -> Ask "Enter Cover Image URI (optional): "
 
     EbookFromList args.strict title author cover urls 
-    
+
+let NovelUpdateBehavior url (args : CLOptions) = 
+    let doc = (NSoupDownload(url)).Value
+    let coverCandidates = (doc.Select("div.seriesimg").Select("img")) |> Seq.toList
+    let title =
+        match args.title with
+        |Title(x) -> x 
+        |EmptyTitle -> (doc.Select("h4.seriestitle") |> Seq.head).OwnText()
+    let author =
+        match args.author with
+        |Author(x) -> x
+        |EmptyAuthor -> (doc.Select("a#authtag") |> Seq.head).OwnText()
+    let cover =
+        match args.cover with
+        |Cover(x) -> x
+        |EmptyCover ->
+                match coverCandidates with
+                |[] -> ""
+                |_ -> (coverCandidates |> List.head).Attr("src")
+    let urls = (GetAllLinks url).Value |> List.rev |> List.toSeq 
+    urls |> Seq.iteri (fun i x -> printfn "%d - %s" i x) |> ignore
+    let input = ProcessInput (Ask "Enter range in format 'a,b'")
+    let range =
+        match input with
+        |(a,b) -> seq {a .. b}
+    let targets = range |> Seq.map (fun x -> Seq.nth x urls)
+    printfn "Downloading... "
+    targets |> Seq.iter (fun x -> printfn "%s" x) |> ignore
+    EbookFromList args.strict title author cover (targets |> Seq.toList)
+
 let HandleArguments (arguments : CLOptions) =
     match arguments.inputs with
     |_ when (arguments.inputs |> List.length) < 1 ->
@@ -99,13 +128,13 @@ let HandleArguments (arguments : CLOptions) =
             match arguments.index with
             |FileIndex -> IndexListBehavior arguments
             |WebIndex -> IndexWebBehavior (arguments.inputs |> List.head) arguments
+            |NovelIndex -> NovelUpdateBehavior (arguments.inputs |> List.head) arguments
     |_ ->
             ListBehavior arguments
+
 
 [<EntryPoint>]
 let main args = 
     let arguments = ProcessArguments args
-    HandleArguments arguments
-    //let p = (ProcessPage "https://shintranslations.com/vol-2-chapter-1-part-1/").Value
-    //printf "%A" p.html
+    HandleArguments arguments 
     0

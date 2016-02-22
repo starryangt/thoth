@@ -198,7 +198,10 @@ module Epub
             newZip.CreateEntryFromFile((CreateRelativePath x.directory), "OEBPS/" + x.src) |> ignore)
         if (book.images |> List.length) > 0 then
             book.images |> List.iter (fun (x : ImageData) ->
-                newZip.CreateEntryFromFile((CreateRelativePath x.directory), "OEBPS/" + x.src) |> ignore)
+                try
+                    newZip.CreateEntryFromFile((CreateRelativePath x.directory), "OEBPS/" + x.src) |> ignore
+                with
+                _ -> ()) |> ignore
         newZip.Dispose()
         
         Directory.Delete(CreateRelativePath "temp", true)
