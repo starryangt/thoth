@@ -180,8 +180,6 @@ module Epub
         WriteMimetype (CreateRelativePath "temp/mimetype")
         WriteContainer (CreateRelativePath "temp/META-INF/container.xml")
 
-        
-
         //Check and delete potential file, because .net throws an exception
         //rather than overwriting
         CheckAndDelete (title + ".epub")
@@ -198,7 +196,7 @@ module Epub
         newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/toc.ncx"), "OEBPS/toc.ncx") |> ignore
         
         //Add in cover
-        newZip.CreateEntryFromFile((CreateRelativePath "Cover/Cover.xhtml"), "OEBPS/Text/Cover.xhtml") |> ignore
+        newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/Text/Cover.xhtml"), "OEBPS/Text/Cover.xhtml") |> ignore
         newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/Images/Cover.png"), "OEBPS/Images/Cover.png") |> ignore
 
         //add in the new files
