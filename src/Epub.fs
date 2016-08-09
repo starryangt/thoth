@@ -3,6 +3,7 @@ module Epub
     open System
     open System.IO.Compression
     open Download
+    open Cover
 
     type Chapter =
         val id : string
@@ -157,14 +158,19 @@ module Epub
         File.WriteAllText(path, container)
 
 
+    let TitleToValidFilename (title : string) =
+        let validChars = Path.GetInvalidFileNameChars()
+        let processed = title.ToCharArray() |> Array.filter (fun (x : char) -> Array.exists (fun elem -> elem = x) validChars |> not)
+        new string(processed)
+
     let CreateEpub (book : Book) =
-        File.Copy((CreateRelativePath "Cover/Cover.xhtml"), 
-            (CreateRelativePath "temp/OEBPS/Text/Cover.xhtml"), true)
+
+        let title = TitleToValidFilename book.metadata.["title"]
+        WriteHTMLCover (CreateRelativePath "temp/OEBPS/Text/Cover.xhtml")
         if (book.metadata.["cover"]) = "" || 
             (ImageDownload book.metadata.["cover"] 
                 (CreateRelativePath "temp/OEBPS/Images/Cover.png")).IsNone then 
-            File.Copy((CreateRelativePath "Cover/Cover.png"), 
-                (CreateRelativePath "temp/OEBPS/Images/Cover.png"))
+            WriteCoverImage (CreateRelativePath "temp/OEBPS/Images/Cover.png") 
 
         //Write TOC and Content.opf files
         File.WriteAllText((CreateRelativePath "temp/OEBPS/content.opf"), book |> GenerateContent)
@@ -174,12 +180,14 @@ module Epub
         WriteMimetype (CreateRelativePath "temp/mimetype")
         WriteContainer (CreateRelativePath "temp/META-INF/container.xml")
 
+        
+
         //Check and delete potential file, because .net throws an exception
         //rather than overwriting
-        CheckAndDelete (book.metadata.["title"] + ".epub")
+        CheckAndDelete (title + ".epub")
 
         //Create new zip
-        let newZip = ZipFile.Open(book.metadata.["title"] + ".epub", ZipArchiveMode.Create)
+        let newZip = ZipFile.Open(title + ".epub", ZipArchiveMode.Create)
         
         //add in mimetype and container.xml
         newZip.CreateEntryFromFile((CreateRelativePath "temp/mimetype"), "mimetype") |> ignore

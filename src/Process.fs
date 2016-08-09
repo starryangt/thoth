@@ -133,6 +133,7 @@ module Process
         (*
             Takes a page, writes the html and downloads the images. 
         *)
+        //Directory.Delete (CreateRelativePath "temp", true)
 
         //Create neccesary file structure
         //Directory.CreateDirectory checks to see if the path exists first

@@ -94,10 +94,7 @@ let IndexListBehavior (args : CLOptions) =
 let NovelUpdateBehavior url (args : CLOptions) = 
     let doc = (NSoupDownload(url)).Value
     let coverCandidates = (doc.Select("div.seriesimg").Select("img")) |> Seq.toList
-    let title =
-        match args.title with
-        |Title(x) -> x 
-        |EmptyTitle -> (doc.Select("h4.seriestitle") |> Seq.head).OwnText()
+    
     let author =
         match args.author with
         |Author(x) -> x
@@ -115,9 +112,21 @@ let NovelUpdateBehavior url (args : CLOptions) =
     let range =
         match input with
         |(a,b) -> seq {a .. b}
+    let a =
+        match input with
+        |(a,_) -> a
+
+    let b =
+        match input with
+        |(_, b) -> b
+
     let targets = range |> Seq.map (fun x -> Seq.nth x urls)
     printfn "Downloading... "
     targets |> Seq.iter (fun x -> printfn "%s" x) |> ignore
+    let title =
+        match args.title with
+        |Title(x) -> x 
+        |EmptyTitle -> ((doc.Select("h4.seriestitle") |> Seq.head).OwnText() + (sprintf " %i - %i" a b))
     EbookFromList args.strict title author cover (targets |> Seq.toList)
 
 let HandleArguments (arguments : CLOptions) =
@@ -135,6 +144,8 @@ let HandleArguments (arguments : CLOptions) =
 
 [<EntryPoint>]
 let main args = 
+
+    CheckAndDeleteDirectory (CreateRelativePath "temp")
     let arguments = ProcessArguments args
     HandleArguments arguments 
     0

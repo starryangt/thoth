@@ -88,7 +88,16 @@ module Download
         match File.Exists(filepath) with
         |false -> ()
         |true -> File.Delete(filepath)
-    
+ 
+    let CheckAndDeleteDirectory path =
+        (*
+            Wrapper around delete that checks if the file exists 
+        *)
+
+        match Directory.Exists(path) with
+        |false -> ()
+        |true -> Directory.Delete(path, true)
+       
     let GetExtension filepath =
         (*
             A wrapper around Path.GetExtension. The reason why it matches against

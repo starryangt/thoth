@@ -3,5 +3,9 @@ test/
 *.swo
 *.epub
 *.exe
+*.rar
+*.txt
+*.pdf
+mimetype
 makefile
 temp/
