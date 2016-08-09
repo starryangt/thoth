@@ -4,6 +4,7 @@ test/
 *.epub
 *.exe
 *.rar
+*.zip
 *.txt
 *.pdf
 mimetype
