@@ -148,4 +148,13 @@ let main args =
     CheckAndDeleteDirectory (CreateRelativePath "temp")
     let arguments = ProcessArguments args
     HandleArguments arguments 
+
+    (*
+    let url = "http://volaretranslations.com/release-that-witch/rw-chapter-91/"
+    let url2 = "http://volaretranslations.com/release-that-witch/rw-chapter-3/"
+    let doc = (NSoupDownload url2).Value
+    let content = KeepTryContent doc 1000
+    //let parent = content.Value |> ParentByStringContent
+    printf "%A" (content.Value)
+    *)
     0

@@ -23,6 +23,7 @@ module Download
         
         let rec DownloadURL (url : string) counter =
             let client = new WebClient()
+            client.Headers.Add("user-agent", "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11")
             printfn "Downloading... %s" url
             if counter > 2 then
                 None

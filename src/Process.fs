@@ -51,6 +51,33 @@ module Process
             |> List.map (fun x -> sprintf "<p>%s</p>" x)
             |> List.fold (fun old next -> old + next + "\n") ""
 
+    let ClearJunk (parent : NSoup.Nodes.Element) = 
+        (*
+            Removes some junk, mostly script tags
+        *)
+        let tagNameFilter (x : NSoup.Nodes.Element) = 
+            let name = x.TagName()
+            match name with
+            |"script" -> true
+            |"style" -> true
+            |_ -> false
+        let classNameFilter (x : NSoup.Nodes.Element) =
+            let name = x.ClassName().ToLower()
+            name.Contains("comments") 
+
+        let idNameFilter (x : NSoup.Nodes.Element) =
+            let name = x.Id.ToLower()
+            name.Contains("comments") 
+               
+        let children = parent.GetAllElements() |> Seq.toList
+        let unwanted = children |> List.filter (fun x -> (tagNameFilter x) || (classNameFilter x) || (idNameFilter x))
+        unwanted |> List.iter (fun x -> x.Text(""); ())
+        unwanted |> List.iter (fun x -> 
+            match (x.Parent) with
+            |parent -> parent.RemoveChild(x)
+            |_ -> ())
+        0       
+
     let ElementToHtml (parent : NSoup.Nodes.Element) =
         (parent.Html())
     
@@ -117,8 +144,10 @@ module Process
         maybe{
             let! doc = NSoupDownload url
             let title = GetTitle doc
-            let! content = FindContent doc
-            let! parent = content |> ParentByStringContent
+            //let! content = FindContent doc 500
+            //let! parent = content |> ParentByStringContent
+            let! parent = KeepTry doc 2000
+            parent |> ClearJunk
             let imageSources = GetImage parent
             let id = Guid.NewGuid().ToString("N")
             let images = 

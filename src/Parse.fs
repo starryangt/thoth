@@ -36,7 +36,7 @@ module Parse
         |true -> "No Title Found"
         |false -> (title |> Seq.head).Text()
 
-    let FindContent (document : NSoup.Nodes.Document) =
+    let FindContent (document : NSoup.Nodes.Document) textThreshold=
         (*
             Given a NSoup document, pulls a list of all elements in the document
             and processes it, finding a selection of tags which likely contain the
@@ -49,10 +49,10 @@ module Parse
             | (hd : NSoup.Nodes.Element) :: tl -> 
                     match (hd.OwnText()).Trim() with
                     |_ when fail > 3 -> loop acc 0 0 tl
-                    |_ when counter > 400 -> loop acc 0 0 []
-                    |_ when (hd.OwnText()).Length < 30 -> 
+                    |_ when counter > textThreshold -> loop acc 0 0 []
+                    |_ when (hd.OwnText()).Length < 300 -> 
                             loop acc counter (fail + 1) tl
-                    |_ when (hd.OwnText()).Length > 30 && ignoredTags hd -> 
+                    |_ when (hd.OwnText()).Length > 300 && ignoredTags hd -> 
                             loop (hd :: acc) (counter + (hd.OwnText()).Length) fail tl
                     |_ -> loop acc counter fail tl
 
@@ -93,9 +93,30 @@ module Parse
             |[] -> ParentByStringContent parents
             | (hd : NSoup.Nodes.Element) :: tl -> 
                     match hd with
-                    |_ when (float (hd.Text()).Length) / (float total) > 0.7 -> Some hd
+                    |_ when (float (hd.Text()).Length) / (float total) > 0.6 -> Some hd
                     |_ -> loop tl
         loop parents
+
+
+    let KeepTry(document : NSoup.Nodes.Document) maxThreshold =
+        
+        let rec loop newThreshold =
+            if newThreshold <= 0 then
+                None
+            else
+                let maybe = new OptionBuilder()
+                let attempt = maybe{
+                    let! content = FindContent document newThreshold
+                    let! parent = content |> ParentByStringContent
+                    return parent
+                }
+                match attempt with
+                |Some(x) -> attempt
+                |None -> loop (newThreshold - 100)
+
+        loop maxThreshold
+
+
 
     let GetAllLinks (baseLink : string) =
         let GetLinks (doc : NSoup.Nodes.Document) =
