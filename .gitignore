@@ -3,6 +3,7 @@ test/
 *.swo
 *.epub
 *.exe
+*.dll
 *.rar
 *.zip
 *.txt

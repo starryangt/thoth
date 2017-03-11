@@ -149,12 +149,12 @@ let main args =
     let arguments = ProcessArguments args
     HandleArguments arguments 
 
-    (*
-    let url = "http://volaretranslations.com/release-that-witch/rw-chapter-91/"
-    let url2 = "http://volaretranslations.com/release-that-witch/rw-chapter-3/"
-    let doc = (NSoupDownload url2).Value
-    let content = KeepTryContent doc 1000
-    //let parent = content.Value |> ParentByStringContent
-    printf "%A" (content.Value)
-    *)
+
+    //let url = "http://volaretranslations.com/release-that-witch/rw-chapter-91/"
+    //let url2 = "https://wolfietranslation.wordpress.com/2015/10/20/the-amber-sword-ch-5/"
+    //let doc = (NSoupDownload url2).Value
+    //let content = (KeepTry doc 2000).Value
+    //let cleared = (content) |> ClearJunk
+    //let parent = content |> ParentByStringContent
+    //printf "%A" content
     0

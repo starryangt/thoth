@@ -163,14 +163,14 @@ module Epub
         let processed = title.ToCharArray() |> Array.filter (fun (x : char) -> Array.exists (fun elem -> elem = x) validChars |> not)
         new string(processed)
 
-    let CreateEpub (book : Book) =
+    let CreateEpub (book : Book) (coverIsFile : bool) =
 
         let title = TitleToValidFilename book.metadata.["title"]
         WriteHTMLCover (CreateRelativePath "temp/OEBPS/Text/Cover.xhtml")
         if (book.metadata.["cover"]) = "" || 
             (ImageDownload book.metadata.["cover"] 
-                (CreateRelativePath "temp/OEBPS/Images/Cover.png")).IsNone then 
-            WriteCoverImage (CreateRelativePath "temp/OEBPS/Images/Cover.png") 
+                (CreateRelativePath "temp/OEBPS/Images/Cover.png")).IsNone then
+                    WriteCoverImage (CreateRelativePath "temp/OEBPS/Images/Cover.png") 
 
         //Write TOC and Content.opf files
         File.WriteAllText((CreateRelativePath "temp/OEBPS/content.opf"), book |> GenerateContent)
@@ -195,9 +195,13 @@ module Epub
         newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/content.opf"), "OEBPS/content.opf") |> ignore
         newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/toc.ncx"), "OEBPS/toc.ncx") |> ignore
         
-        //Add in cover
         newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/Text/Cover.xhtml"), "OEBPS/Text/Cover.xhtml") |> ignore
-        newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/Images/Cover.png"), "OEBPS/Images/Cover.png") |> ignore
+        //Add in cover
+        if(not coverIsFile) then
+            newZip.CreateEntryFromFile((CreateRelativePath "temp/OEBPS/Images/Cover.png"), "OEBPS/Images/Cover.png") |> ignore
+        else
+            newZip.CreateEntryFromFile(("Cover.png"), "OEBPS/Images/Cover.png") |> ignore
+
 
         //add in the new files
         book.chapters |> List.iter (fun (x : Chapter) ->

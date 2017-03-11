@@ -66,8 +66,7 @@ module Download
                     <title></title>\n\
             </head>\n\
             <body>\n\
-                    <h3 align=\"center\">%s</h3>\n\
-                    <hr />\n\
+                    <h3 align=\"right\">%s</h3>\n\
                     %s\n\
             </body>\n\
             </html>" title content;;

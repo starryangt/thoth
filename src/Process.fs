@@ -64,6 +64,10 @@ module Process
         let classNameFilter (x : NSoup.Nodes.Element) =
             let name = x.ClassName().ToLower()
             name.Contains("comments") 
+            || name.Contains("wpcnt")
+            || name.Contains("sharedaddy")
+            || name.Contains("share-twitter")
+            || name.Contains("embed-youtube")
 
         let idNameFilter (x : NSoup.Nodes.Element) =
             let name = x.Id.ToLower()
@@ -72,10 +76,6 @@ module Process
         let children = parent.GetAllElements() |> Seq.toList
         let unwanted = children |> List.filter (fun x -> (tagNameFilter x) || (classNameFilter x) || (idNameFilter x))
         unwanted |> List.iter (fun x -> x.Text(""); ())
-        unwanted |> List.iter (fun x -> 
-            match (x.Parent) with
-            |parent -> parent.RemoveChild(x)
-            |_ -> ())
         0       
 
     let ElementToHtml (parent : NSoup.Nodes.Element) =
@@ -147,6 +147,7 @@ module Process
             //let! content = FindContent doc 500
             //let! parent = content |> ParentByStringContent
             let! parent = KeepTry doc 2000
+            printfn "Content found"
             parent |> ClearJunk
             let imageSources = GetImage parent
             let id = Guid.NewGuid().ToString("N")
@@ -202,6 +203,44 @@ module Process
         let img = pages |> List.fold (fun (acc : Book) (page : Page) ->
             page.images.filepaths |> List.fold (fun ac img ->
                 ac |> AddImage img) acc) html
-        CreateEpub img
+        CreateEpub img false
              
-    
+    let EbookFromListCoverIsFile (strict : bool) title author cover (urls : seq<string>) = 
+        (*
+            "Complete" function - takes an title, author, cover and a list of urls.
+            Downloads all the urls and creates an epub.
+        *)
+
+
+        let furl = (List.ofSeq(urls))
+        let pages = ProcessList strict furl
+        if (pages |> List.length) < 1 then failwith "All pages failed to download."
+        let book = GetBook |> AddTitle title |> AddAuthor author |> AddCover cover
+        let html = pages |> List.rev |> List.fold (fun (acc : Book) (page : Page) ->
+            acc |> AddHTML ((CreateRelativePath "temp/OEBPS/Text/") + page.uuid + ".xhtml") page.title) book
+        let img = pages |> List.fold (fun (acc : Book) (page : Page) ->
+            page.images.filepaths |> List.fold (fun ac img ->
+                ac |> AddImage img) acc) html
+        CreateEpub img true
+
+
+
+    let EbookFromListDefault (strict : bool) title author cover (urls : seq<string>) = 
+        (*
+            "Complete" function - takes an title, author, cover and a list of urls.
+            Downloads all the urls and creates an epub.
+        *)
+
+
+        let furl = (List.ofSeq(urls))
+        let pages = ProcessList strict furl
+        if (pages |> List.length) < 1 then failwith "All pages failed to download."
+        let book = GetBook |> AddTitle title |> AddAuthor author |> AddCover cover
+        let html = pages |> List.rev |> List.fold (fun (acc : Book) (page : Page) ->
+            acc |> AddHTML ((CreateRelativePath "temp/OEBPS/Text/") + page.uuid + ".xhtml") page.title) book
+        let img = pages |> List.fold (fun (acc : Book) (page : Page) ->
+            page.images.filepaths |> List.fold (fun ac img ->
+                ac |> AddImage img) acc) html
+        CreateEpub img false
+             
+     
