@@ -8,6 +8,8 @@ test/
 *.zip
 *.txt
 *.pdf
+*.XML
+*.pdb
 mimetype
 makefile
 temp/
