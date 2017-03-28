@@ -6,6 +6,9 @@ The only dependency is NSoup, which is a port of JSoup to .net. Of course, the .
 
 ####Usage
 
+Experimental GUI can be found here:
+https://github.com/flyingjam/thoth-gui
+
 thoth is intended to be used as a command line program, but works as just an executable as well, though some flexibility is lost. There are three main ways to feed in urls:
 
 1. An index file on the internet
