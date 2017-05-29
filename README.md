@@ -1,12 +1,12 @@
 ### thoth
 Making epubs from web pages.
 
-####Depedencies
+#### Depedencies
 The only dependency is NSoup, which is a port of JSoup to .net. Of course, the .net runtime is required as well.
 
-####Usage
+#### Usage
 
-Experimental GUI can be found here:
+## Experimental GUI can be found here:
 https://github.com/flyingjam/thoth-gui
 
 thoth is intended to be used as a command line program, but works as just an executable as well, though some flexibility is lost. There are three main ways to feed in urls:
@@ -23,7 +23,7 @@ thoth is intended to be used as a command line program, but works as just an exe
 
   If multiple arguments are inputted, then those will be downloaded. 
   
-#####Flags
+##### Flags
 
 * -a Author — Sets the author
 * -t Title— Sets the title
@@ -31,7 +31,7 @@ thoth is intended to be used as a command line program, but works as just an exe
 * -w — Downloads the argument as index
 * -s — Sets strict mode on. Use if you're getting XML errors in the generated epubs (i.e if the epub doesn't open, try this)
 
-####FAQ
+#### FAQ
 
 * Why is it called thoth?
 
