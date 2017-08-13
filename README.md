@@ -62,23 +62,7 @@ thoth is intended to be used as a command line program, but works as just an exe
 * Does this work on Linux/OSX?
 
   Actually, it does. I developed it mostly in mono on linux. You do need v4.0 of the mono runtime because ZipFile wasn't implemented till then.
-  
-* Why is there so little epub metadata configuring?
-
-  Because I'm lazy.
-  
-* Why no GUI?
-
-  Because GUIs are hard and I'll have to use an imperative library to do it and I'll actually have to with runtime errors.
-  
-* Why not the HTMLAgilityPack?
-
-  Three reasons:
-    1. There apparently isn't online documentation. Wat. At least NSoup is basically verbatim JSoup, so I can use their docs.
-    2. License. Not a big deal, but NSoup is under a more permissive license.
-    3. Up-to-date-ness. Apparently the HTMLAgilityPack hasn't been updated since 2012. Wat.
-    
-
+ 
 
 
 
